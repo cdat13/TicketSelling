@@ -2,7 +2,6 @@ import sys
 import pytest
 
 from ticketselling import create_app
-from ticketselling.ext.commands import populate_db
 from ticketselling.ext.database import db
 
 
@@ -14,11 +13,6 @@ def app():
         yield app
         db.drop_all(app=app)
 
-
-@pytest.fixture(scope="session")
-def products(app):
-    with app.app_context():
-        return populate_db()
 
 
 # each test runs on cwd to its temp dir
