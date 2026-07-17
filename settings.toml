@@ -44,4 +44,4 @@ DEBUG_TB_PANELS = [
 SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
 
 [production]
-SQLALCHEMY_DATABASE_URI = 'sqlite:///production.db'
+SQLALCHEMY_DATABASE_URI = "@format mysql+pymysql://{env[DB_USER]}:{env[DB_PASSWORD]}@{env[DB_HOST]}:{env[DB_PORT]}/{env[DB_NAME]}"
