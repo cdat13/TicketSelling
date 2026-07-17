@@ -8,3 +8,4 @@ dynaconf
 click
 flask-restful
 gunicorn==23.0.0
+Flask-DebugToolbar
