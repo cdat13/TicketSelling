@@ -1,8 +1,12 @@
 from flask import Blueprint
 
-from .views import index, only_admin, secret
+from .views import index, only_admin, secret, login, register
 
 bp = Blueprint("webui", __name__, template_folder="templates")
+
+
+bp.add_url_rule("/login",view_func=login,endpoint="login")
+bp.add_url_rule("/register",view_func=register,endpoint="register")
 
 bp.add_url_rule("/", view_func=index)
 bp.add_url_rule("/secret", view_func=secret, endpoint="secret")

@@ -1,0 +1,65 @@
+<footer class="bg-dark text-light mt-5 py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <h5 class="fw-bold">
+                    TicketSelling
+                </h5>
+                <p class="small text-secondary mb-0">
+                    An online ticket booking system for concerts,
+                    sports and entertainment events.
+                </p>
+            </div>
+            <div class="col-md-4 mb-3">
+                <h5>
+                    Quick Links
+                </h5>
+                <ul class="list-unstyled">
+                    <li>
+                        <a href="/" class="text-decoration-none text-secondary">
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="text-decoration-none text-secondary">
+                            Events
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('webui.login') }}"
+                           class="text-decoration-none text-secondary">
+                            Login
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('webui.register') }}"
+                           class="text-decoration-none text-secondary">
+                            Register
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h5>
+                    Contact
+                </h5>
+                <p class="small text-secondary mb-1">
+                    Ho Chi Minh City, Vietnam
+                </p>
+                <p class="small text-secondary mb-1">
+                    support@ticketselling.com
+                </p>
+                <p class="small text-secondary">
+                    (+84) 123 456 789
+                </p>
+            </div>
+        </div>
+
+        <hr class="border-secondary">
+        <div class="text-center small text-secondary">
+            © 2026 TicketSelling. All rights reserved.
+        </div>
+    </div>
+
+</footer>

@@ -1,0 +1,32 @@
+<nav class="navbar navbar-expand-lg bg-white border-bottom shadow-sm">
+
+    <div class="container">
+        <a class="navbar-brand fw-bold text-primary"
+           href="{{ url_for('webui.index') }}">
+            TicketSelling
+        </a>
+
+        <form class="d-flex flex-grow-1 mx-4">
+            <input
+                class="form-control rounded-pill"
+                type="search"
+                placeholder="Tìm kiếm sự kiện, địa điểm..."
+                aria-label="Search">
+        </form>
+
+        <div class="d-flex align-items-center">
+            <a
+                href="{{ url_for('webui.login') }}"
+                class="btn btn-link text-dark text-decoration-none">
+                Đăng nhập
+            </a>
+
+            <a
+                href="{{ url_for('webui.register') }}"
+                class="btn btn-primary rounded-pill ms-2">
+                Đăng ký
+            </a>
+        </div>
+    </div>
+
+</nav>
