@@ -1,9 +1,10 @@
-from flask import abort, render_template
+from flask import render_template
 from flask_simplelogin import login_required
 
+
 def index():
-    # return render_template("index.html")
-    return "<h1>TicketSelling</h1>"
+    return render_template("index.html")
+
 
 @login_required
 def secret():
@@ -14,8 +15,10 @@ def secret():
 def only_admin():
     return "only admin user can see this text"
 
+
 def login():
     return render_template("auth/login.html")
+
 
 def register():
     return render_template("auth/register.html")
