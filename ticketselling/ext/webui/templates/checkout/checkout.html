@@ -1,0 +1,465 @@
+﻿{% extends "layout/base.html" %}
+
+{% block title %}
+Thanh toán
+{% endblock %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <!-- Progress -->
+    <div class="checkout-step mb-5">
+
+        <div class="step active" id="indicator1">
+            <div class="step-number">1</div>
+            <span>Thông tin</span>
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step" id="indicator2">
+            <div class="step-number">2</div>
+            <span>Thanh toán</span>
+        </div>
+
+        <div class="step-line"></div>
+
+        <div class="step" id="indicator3">
+            <div class="step-number">3</div>
+            <span>Hoàn tất</span>
+        </div>
+
+    </div>
+
+    <div class="row g-4">
+
+    <!-- LEFT -->
+
+        <div class="col-lg-8">
+
+    <!--  STEP 1  -->
+
+            <div id="step1">
+
+                <div class="card checkout-card">
+
+                    <div class="card-body p-4">
+
+                        <h3 class="mb-4">
+                            Thông tin nhận vé
+                        </h3>
+
+                        <div class="row">
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Họ và tên
+                                </label>
+
+                                <input class="form-control">
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Email
+                                </label>
+
+                                <input type="email"
+                                       class="form-control">
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    Số điện thoại
+                                </label>
+
+                                <input class="form-control">
+
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+
+                                <label class="form-label">
+                                    CCCD / Passport
+                                </label>
+
+                                <input class="form-control">
+
+                            </div>
+
+                        </div>
+
+                        <hr>
+
+                        <h5 class="mb-3">
+                            Hình thức nhận vé
+                        </h5>
+
+                        <div class="delivery-option ">
+
+                            <input type="radio" name="delivery">
+
+                            <div>
+
+                                <h6>Vé điện tử</h6>
+
+                                <small>
+                                    Vé sẽ gửi qua Email ngay sau khi thanh toán.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <div class="delivery-option">
+
+                            <input type="radio"
+                                   name="delivery">
+
+                            <div>
+
+                                <h6>Nhận tại sự kiện</h6>
+
+                                <small>
+                                    Xuất trình mã đơn hàng khi check-in.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <button id="btnNext1"
+                                type="button"
+                                class="btn btn-primary btn-lg">
+
+                            Tiếp tục
+                            <i class="fa-solid fa-arrow-right ms-2"></i>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+    <!--  STEP 2  -->
+
+            <div id="step2" style="display:none;">
+
+                <div class="card checkout-card">
+
+                    <div class="card-body p-4">
+
+                        <h3 class="mb-4">
+
+                            Chọn phương thức thanh toán
+
+                        </h3>
+
+                        <div class="payment-item ">
+
+                            <input 
+                                   type="radio"
+                                   name="payment">
+
+                            <div>
+
+                                <h5>
+
+                                    <i class="fa-solid fa-qrcode me-2"></i>
+
+                                    VNPAY QR
+
+                                </h5>
+
+                                <small>
+
+                                    Quét QR bằng ứng dụng ngân hàng.
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <div class="payment-item">
+
+                            <input type="radio"
+                                   name="payment">
+
+                            <div>
+
+                                <h5>
+
+                                    <i class="fa-solid fa-wallet me-2"></i>
+
+                                    MOMO
+
+                                </h5>
+
+                                <small>
+
+                                    Thanh toán qua ví MOMO.
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <div class="payment-item">
+
+                            <input type="radio"
+                                   name="payment">
+
+                            <div>
+
+                                <h5>
+
+                                    <i class="fa-solid fa-credit-card me-2"></i>
+
+                                    VISA / MasterCard
+
+                                </h5>
+
+                                <small>
+
+                                    Thanh toán quốc tế.
+
+                                </small>
+
+                            </div>
+
+                        </div>
+
+                        <hr class="my-4">
+
+                        <label class="form-label">
+
+                            Mã giảm giá
+
+                        </label>
+
+                        <div class="input-group">
+
+                            <input class="form-control"
+                                   placeholder="Nhập mã">
+
+                            <button class="btn btn-outline-primary">
+
+                                Áp dụng
+
+                            </button>
+
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-5">
+
+                            <button id="btnBack1"
+                                    type="button"
+                                    class="btn btn-light">
+
+                                Quay lại
+
+                            </button>
+
+                            <button id="btnNext2"
+                                    type="button"
+                                    class="btn btn-primary btn-lg">
+
+                                Thanh toán
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+    <!--  STEP 3  -->
+
+            <div id="step3" style="display:none;">
+
+                <div class="card checkout-card">
+
+                    <div class="card-body p-5 text-center">
+
+                        <h3>
+
+                            Quét mã QR để thanh toán
+
+                        </h3>
+
+                        <p class="text-muted">
+
+                            Sử dụng ứng dụng ngân hàng hoặc VNPAY.
+
+                        </p>
+
+                        <div class="qr-placeholder">
+
+                            QR CODE
+
+                        </div>
+
+                        <div class="mt-4">
+
+                            <h4 class="text-primary">
+
+                                1.598.000đ
+
+                            </h4>
+
+                        </div>
+
+                        <p>
+
+                            Mã đơn hàng
+
+                            <strong>
+
+                                TS2026001
+
+                            </strong>
+
+                        </p>
+
+                        <div class="mt-4">
+
+                            <button id="btnBack2"
+                                    type="button"
+                                    class="btn btn-light">
+
+                                Quay lại
+
+                            </button>
+
+                        </div>
+
+                        <hr>
+
+                        <p>
+
+                            Sau khi thanh toán thành công hệ thống sẽ tự động xác nhận.
+
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    <!-- RIGHT -->
+
+        <div class="col-lg-4">
+
+            <div class="card ticket-summary">
+
+                <img src="{{ url_for('webui.static', filename='img/demo.png') }}"
+                     class="card-img-top">
+
+                <div class="card-body">
+
+                    <span class="badge bg-danger">
+
+                        Concert
+
+                    </span>
+
+                    <h4 class="mt-3">
+
+                        Summer Music Festival
+
+                    </h4>
+
+                    <p class="text-muted">
+
+                        20/08/2026
+
+                    </p>
+
+                    <p>
+
+                        TP Hồ Chí Minh
+
+                    </p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+
+                        <span>
+
+                            Vé VIP
+
+                        </span>
+
+                        <span>
+
+                            x2
+
+                        </span>
+
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+
+                        <span>
+
+                            Giá
+
+                        </span>
+
+                        <strong>
+
+                            799.000đ
+
+                        </strong>
+
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between">
+
+                        <h5>
+
+                            Tổng cộng
+
+                        </h5>
+
+                        <h4 class="text-primary">
+
+                            1.598.000đ
+
+                        </h4>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('webui.static', filename='js/checkout.js') }}"></script>
+{% endblock %}

@@ -1,6 +1,6 @@
 from flask import Blueprint
 
-from .views import index, only_admin, secret, login, register
+from .views import index, only_admin, secret, login, register, checkout
 
 
 bp = Blueprint(
@@ -19,6 +19,10 @@ bp.add_url_rule("/register",view_func=register,endpoint="register")
 #trang chu
 bp.add_url_rule("/", view_func=index)
 bp.add_url_rule("/index", view_func=index)
+
+#thanh toan
+bp.add_url_rule("/checkout",view_func=checkout,endpoint="checkout")
+
 
 
 bp.add_url_rule("/secret", view_func=secret, endpoint="secret")

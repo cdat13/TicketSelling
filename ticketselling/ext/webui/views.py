@@ -22,3 +22,7 @@ def login():
 
 def register():
     return render_template("auth/register.html")
+
+    
+def checkout():
+    return render_template("checkout/checkout.html")

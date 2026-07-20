@@ -204,3 +204,273 @@ footer {
         margin-top: 10px;
         font-weight: 600;
     }
+
+/*trang thanh toan*/
+body {
+    background: #f6f8fb;
+}
+
+/* ===========================
+        STEP
+=========================== */
+
+.checkout-step {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.step-number {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #dee2e6;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    transition: .3s;
+}
+
+.step span {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #777;
+}
+
+.step.active .step-number {
+    background: var(--bs-primary);
+    color: white;
+}
+
+.step.active span {
+    color: #000;
+}
+
+.step-line {
+    width: 120px;
+    height: 2px;
+    background: #dee2e6;
+    margin: 0 15px;
+}
+
+
+/* ===========================
+        CARD
+=========================== */
+
+.checkout-card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.08);
+}
+
+.ticket-summary {
+    position: sticky;
+    top: 20px;
+    border: none;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 12px 35px rgba(0,0,0,.08);
+}
+
+    .ticket-summary img {
+        height: 230px;
+        object-fit: cover;
+    }
+
+    .ticket-summary .card-body {
+        padding: 25px;
+    }
+
+
+/* ===========================
+        FORM
+=========================== */
+
+.form-control,
+.form-select {
+    border-radius: 12px;
+    min-height: 50px;
+}
+
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: none;
+        border-color: var(--bs-primary);
+    }
+
+
+/* ===========================
+    DELIVERY OPTION
+=========================== */
+
+.delivery-option {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    border: 2px solid #eee;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: .25s;
+}
+
+    .delivery-option:hover {
+        border-color: var(--bs-primary);
+    }
+
+    .delivery-option.active {
+        border-color: var(--bs-primary);
+        background: #f5f9ff;
+    }
+
+    .delivery-option input {
+        margin-top: 6px;
+    }
+
+    .delivery-option h6 {
+        margin-bottom: 5px;
+    }
+
+
+/* ===========================
+      PAYMENT
+=========================== */
+
+.payment-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    border: 2px solid #ececec;
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: .3s;
+}
+
+    .payment-item:hover {
+        border-color: var(--bs-primary);
+        transform: translateY(-3px);
+    }
+
+    .payment-item.active {
+        border-color: var(--bs-primary);
+        background: #f5f9ff;
+    }
+
+    .payment-item i {
+        color: var(--bs-primary);
+    }
+
+    .payment-item h5 {
+        margin-bottom: 8px;
+    }
+
+    .payment-item input {
+        margin-top: 8px;
+    }
+
+
+/* ===========================
+        BUTTON
+=========================== */
+
+.btn {
+    border-radius: 12px;
+}
+
+.btn-primary {
+    padding: 12px 28px;
+}
+
+
+/* ===========================
+        QR
+=========================== */
+
+.qr-placeholder {
+    width: 270px;
+    height: 270px;
+    margin: auto;
+    margin-top: 35px;
+    margin-bottom: 35px;
+    border: 2px dashed #bbb;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #999;
+    background: white;
+}
+
+
+/* ===========================
+        BADGE
+=========================== */
+
+.badge {
+    border-radius: 8px;
+}
+
+
+/* ===========================
+      SUMMARY
+=========================== */
+
+.ticket-summary hr {
+    margin: 20px 0;
+}
+
+.ticket-summary h4 {
+    font-weight: 700;
+}
+
+
+/* ===========================
+      MOBILE
+=========================== */
+
+@media(max-width:992px) {
+
+    .ticket-summary {
+        position: static;
+        margin-top: 30px;
+    }
+
+    .checkout-step {
+        flex-wrap: wrap;
+    }
+
+    .step-line {
+        width: 60px;
+    }
+}
+
+@media(max-width:768px) {
+
+    .checkout-step {
+        display: none;
+    }
+
+    .checkout-card .card-body {
+        padding: 25px;
+    }
+
+    .qr-placeholder {
+        width: 220px;
+        height: 220px;
+    }
+}
