@@ -45,3 +45,25 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
 
 [production]
 SQLALCHEMY_DATABASE_URI = "@format mysql+pymysql://{env[DB_USER]}:{env[DB_PASSWORD]}@{env[DB_HOST]}:{env[DB_PORT]}/{env[DB_NAME]}"
+
+# ==========================
+# VNPAY SANDBOX
+# ==========================
+
+VNPAY_TMN_CODE="C267DLWS"
+
+VNPAY_HASH_SECRET="RCZB1B6FHJZAWP83LT84G4W81NPOAT3I"
+
+VNPAY_URL="https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+
+VNPAY_RETURN_URL="http://localhost:5000/payment/return"
+
+VNPAY_API="https://sandbox.vnpayment.vn/merchant_webapi/api/transaction"
+
+VNPAY_VERSION="2.1.0"
+
+VNPAY_COMMAND="pay"
+
+VNPAY_CURRENCY="VND"
+
+VNPAY_LOCALE="vn"

@@ -28,28 +28,30 @@ deliveryOptions.forEach(option => {
 
 const paymentOptions = document.querySelectorAll(".payment-item");
 
-// default chosing VNPAY
-paymentOptions[0].classList.add("active");
-paymentOptions[0].querySelector("input").checked = true;
+if (paymentOptions.length > 0) {
 
-paymentOptions.forEach(option => {
+    paymentOptions[0].classList.add("active");
+    paymentOptions[0].querySelector("input").checked = true;
 
-    option.addEventListener("click", function () {
+    paymentOptions.forEach(option => {
 
-        paymentOptions.forEach(item => {
+        option.addEventListener("click", function () {
 
-            item.classList.remove("active");
-            item.querySelector("input[type='radio']").checked = false;
+            paymentOptions.forEach(item => {
+
+                item.classList.remove("active");
+                item.querySelector("input").checked = false;
+
+            });
+
+            this.classList.add("active");
+            this.querySelector("input").checked = true;
 
         });
 
-        this.classList.add("active");
-        this.querySelector("input[type='radio']").checked = true;
-
     });
 
-});
-
+}
 
 // BUTTONS
 
