@@ -8,24 +8,27 @@
 
         <form class="d-flex flex-grow-1 mx-4">
             <input
-                class="form-control rounded-pill"
-                type="search"
-                placeholder="Tìm kiếm sự kiện, địa điểm..."
-                aria-label="Search">
+                    class="form-control rounded-pill"
+                    type="search"
+                    placeholder="Tìm kiếm sự kiện, địa điểm..."
+                    aria-label="Search">
         </form>
 
-        <div class="d-flex align-items-center">
-            <a
-                href="{{ url_for('webui.login') }}"
-                class="btn btn-link text-dark text-decoration-none">
-                Đăng nhập
+        <div class="ms-auto d-flex align-items-center gap-2">
+            {% if is_logged_in() %}
+            <a href="{{ url_for('simplelogin.logout') }}" class="btn btn-outline-danger">
+                Đăng xuất
             </a>
 
-            <a
-                href="{{ url_for('webui.register') }}"
-                class="btn btn-primary rounded-pill ms-2">
+            {% else %}
+
+            <a href="{{ url_for('simplelogin.login') }}" class="btn btn-link text-decoration-none">
+                Đăng nhập
+            </a>
+            <a href="{{ url_for('webui.register') }}" class="btn btn-primary">
                 Đăng ký
             </a>
+            {% endif %}
         </div>
     </div>
 

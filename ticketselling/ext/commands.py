@@ -23,6 +23,6 @@ def init_app(app):
     @app.cli.command()
     @click.option("--username", "-u")
     @click.option("--password", "-p")
-    def add_user(username, password):
+    def add_user(fullname,email,username, password):
         """Adds a new user to the database"""
-        return create_user(username, password)
+        return create_user(fullname=fullname, email=email,username=username, password=password)

@@ -46,6 +46,11 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
 [production]
 SQLALCHEMY_DATABASE_URI = "@format mysql+pymysql://{env[DB_USER]}:{env[DB_PASSWORD]}@{env[DB_HOST]}:{env[DB_PORT]}/{env[DB_NAME]}"
 
+#SIMPLE LOGIN
+SIMPLELOGIN_LOGIN_URL = "/login"
+SIMPLELOGIN_LOGOUT_URL = "/logout"
+SIMPLELOGIN_HOME_URL = "/"
+
 # ==========================
 # VNPAY SANDBOX
 # ==========================

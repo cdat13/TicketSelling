@@ -2,6 +2,7 @@
 from datetime import datetime
 
 
+
 from ticketselling.ext.database import db
 
 
@@ -9,6 +10,8 @@ class User(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(140))
     password = db.Column(db.String(512))
+    email = db.Column(db.String(120),nullable = False)
+    full_name = db.Column(db.String(150),nullable = False)
 
 class Order(db.Model):
     __tablename__ = "orders"

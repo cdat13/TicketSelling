@@ -1,6 +1,7 @@
 from flask import Blueprint
 
-from .views import index, only_admin, secret, login, register, checkout
+from .views import index, only_admin, secret, register, checkout
+# from .views import login
 from ticketselling.payment import bp as payment_bp
 
 bp = Blueprint(
@@ -11,8 +12,8 @@ bp = Blueprint(
     static_url_path="/webui/static"
 )
 
-bp.add_url_rule("/login", view_func=login, endpoint="login")
-bp.add_url_rule("/register", view_func=register, endpoint="register")
+# bp.add_url_rule("/login", view_func=login, endpoint="login")
+bp.add_url_rule("/register", view_func=register, endpoint="register", methods= ["GET", "POST"])
 
 bp.add_url_rule("/", view_func=index)
 bp.add_url_rule("/index", view_func=index)
