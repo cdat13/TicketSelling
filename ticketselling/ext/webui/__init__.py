@@ -3,6 +3,7 @@ from flask import Blueprint
 from .views import index, only_admin, secret, register, checkout
 # from .views import login
 from ticketselling.payment import bp as payment_bp
+from .views import event_detail
 
 bp = Blueprint(
     "webui",
@@ -17,7 +18,7 @@ bp.add_url_rule("/register", view_func=register, endpoint="register", methods= [
 
 bp.add_url_rule("/", view_func=index)
 bp.add_url_rule("/index", view_func=index)
-
+bp.add_url_rule("/events/<int:event_id>", view_func= event_detail, endpoint="event_detail")
 bp.add_url_rule("/checkout", view_func=checkout, endpoint="checkout")
 
 bp.add_url_rule("/secret", view_func=secret, endpoint="secret")

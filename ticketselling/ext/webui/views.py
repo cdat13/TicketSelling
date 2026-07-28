@@ -1,13 +1,13 @@
-from math import expm1
-
-from flask import render_template, request, redirect,url_for
+from flask import flash, render_template, request, redirect, url_for
 from flask_simplelogin import login_required
-
+from ticketselling.models import Event
 from ticketselling.ext.auth import create_user
 
 
 def index():
-    return render_template("index.html")
+    events = Event.query.filter_by(status="ACTIVE").limit(4).all()
+
+    return render_template("index.html", events=events)
 
 
 @login_required
@@ -20,7 +20,6 @@ def only_admin():
     return "only admin user can see this text"
 
 
-
 def register():
     err_msg = None
 
@@ -31,7 +30,7 @@ def register():
         password = request.form.get("password", "")
         confirm = request.form.get("confirm", "")
 
-        if not all([full_name,email,username,password,confirm,]):
+        if not all([full_name, email, username, password, confirm, ]):
             err_msg = "Vui lòng nhập đầy đủ thông tin."
 
         elif "@" not in email:
@@ -74,6 +73,15 @@ def register():
         "auth/register.html",
         err_msg=err_msg,
     )
+
+
+def event_detail(event_id):
+    event = Event.query.filter_by(id = event_id, status = "ACTIVE").first()
+    if event is None:
+        flash("Sự kiện không tồn tại hoặc hiện không khả dụng.", "warning")
+        return redirect(url_for("webui.index"))
+
+    return render_template("event/detail.html", event=event)
 
 
 def checkout():

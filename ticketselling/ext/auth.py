@@ -1,4 +1,5 @@
-from flask_simplelogin import SimpleLogin
+from flask_simplelogin import SimpleLogin, Message
+from pyexpat.errors import messages
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ticketselling.ext.database import db
@@ -47,4 +48,12 @@ def create_user(full_name, email,username, password):
 
 
 def init_app(app):
-    SimpleLogin(app, login_checker=verify_login)
+    messages = {
+        "login_success": Message("Đăng nhập thành công.", "success"),
+        "login_failure": Message("Tên đăng nhập hoặc mật khẩu không đúng.", "danger"),
+        "login_required": Message("Bạn cần đăng nhập trước.", "warning"),
+        "logout": Message("Đăng xuất thành công.", "success"),
+        "auth_error": Message("Lỗi xác thực {0}.", "danger"),
+
+    }
+    SimpleLogin(app, login_checker=verify_login, messages=messages)

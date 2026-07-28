@@ -13,6 +13,61 @@ class User(db.Model, SerializerMixin):
     email = db.Column(db.String(120),nullable = False)
     full_name = db.Column(db.String(150),nullable = False)
 
+class EventCategory(db.Model, SerializerMixin):
+    __tablename__ = "event_categories"
+
+    id = db.Column(db.Integer, primary_key = True)
+    name = db.Column(db.String(100), nullable = False)
+
+    def __repr__(self):
+        return f"<EventCategory {self.name}"
+
+
+class Event(db.Model, SerializerMixin):
+    __tablename__ = "events"
+
+    id = db.Column(db.Integer, primary_key=True)
+    organizer_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    category_id = db.Column(db.Integer, db.ForeignKey("event_categories.id"))
+    name = db.Column(db.String(255), nullable=False)
+    banner = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    location = db.Column(db.String(255))
+
+    start_time = db.Column(db.DateTime)
+    end_time = db.Column(db.DateTime)
+
+    sale_start = db.Column(db.DateTime)
+    sale_end = db.Column(db.DateTime)
+    status = db.Column(db.String(20),default="ACTIVE")
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    organizer = db.relationship("User",backref="organized_events")
+    category = db.relationship("EventCategory",backref="events")
+
+
+    def __repr__(self):
+        return f"<Event {self.name}"
+
+class TicketType(db.Model, SerializerMixin):
+    __tablename__ = "ticket_types"
+
+    id = db.Column(db.Integer,primary_key=True)
+    event_id = db.Column(db.Integer,db.ForeignKey("events.id"),nullable=False)
+    name = db.Column(db.String(100),nullable=False)
+    description = db.Column(db.Text)
+    price = db.Column(db.Numeric(12, 2),nullable=False)
+    max_quantity = db.Column(db.Integer,nullable=False)
+
+    current_stock = db.Column(db.Integer,nullable=False)
+
+    event = db.relationship("Event",
+                            backref=db.backref("ticket_types",
+                                lazy=True,cascade="all, delete-orphan"))
+
+    def __repr__(self):
+        return f"<TicketType {self.name}>"
+
 class Order(db.Model):
     __tablename__ = "orders"
 

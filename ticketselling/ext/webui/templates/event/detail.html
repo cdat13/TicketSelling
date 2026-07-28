@@ -1,0 +1,226 @@
+{% extends "layout/base.html" %}
+
+{% block title %}{{ event.name }}{% endblock %}
+
+{% block main_class %}event-detail-page{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet"
+      href="{{ url_for('webui.static', filename='css/event_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="event-breadcrumb">
+    <div class="container py-2">
+        <a href="{{ url_for('webui.index') }}">
+            <i class="fa-solid fa-arrow-left me-1"></i> Trang chủ
+        </a>
+        <span class="mx-2">/</span>
+        <span>{{ event.name }}</span>
+    </div>
+</div>
+
+<section class="event-hero"
+         style="background-image:
+         linear-gradient(rgba(8,15,35,.15), rgba(8,15,35,.93)),
+         url('{{ url_for('webui.static',
+         filename=event.banner or 'img/demo.png') }}');">
+    <div class="container event-hero-content">
+        <span class="event-category">
+            {% if event.category %}
+                {{ event.category.name }}
+            {% else %}
+                Sự kiện
+            {% endif %}
+        </span>
+
+        <h1>{{ event.name }}</h1>
+
+        <p class="mb-0">
+            <i class="fa-regular fa-user me-1"></i>
+            {% if event.organizer %}
+            {{ event.organizer.full_name }}
+            {% else %}
+            Ban tổ chức
+            {% endif %}
+        </p>
+    </div>
+</section>
+
+<section class="event-summary">
+    <div class="container">
+        <div class="event-summary-list">
+            <div class="summary-item">
+                <div class="summary-icon">
+                    <i class="fa-regular fa-calendar"></i>
+                </div>
+                <div>
+                    <small>Ngày tổ chức</small>
+                    <strong>{{ event.start_time.strftime("%d/%m/%Y") }}</strong>
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-icon">
+                    <i class="fa-regular fa-clock"></i>
+                </div>
+                <div>
+                    <small>Giờ bắt đầu</small>
+                    <strong>{{ event.start_time.strftime("%H:%M") }}</strong>
+                </div>
+            </div>
+
+            <div class="summary-item">
+                <div class="summary-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div>
+                    <small>Địa điểm</small>
+                    <strong>{{ event.location }}</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container event-main">
+    <div class="row g-3 align-items-start">
+        <div class="col-lg-8">
+            <section class="content-card mb-3">
+                <h2 class="section-title">
+                    <span class="title-icon">
+                        <i class="fa-solid fa-info-circle"></i>
+                    </span>
+                    Thông tin sự kiện
+                </h2>
+
+                {% if event.description %}
+                <div class="event-description">{{ event.description }}</div>
+                {% else %}
+                <p class="text-secondary mb-0">
+                    Sự kiện hiện chưa có nội dung mô tả.
+                </p>
+                {% endif %}
+            </section>
+
+            <section class="content-card">
+                <h2 class="section-title">Điều khoản &amp; Quy định</h2>
+                <ul class="policy-list mb-0">
+                    <li>Vé đã mua không được hoàn hoặc hủy, trừ khi sự kiện bị hủy.</li>
+                    <li>Vui lòng có mặt trước giờ bắt đầu ít nhất 30 phút.</li>
+                    <li>Xuất trình vé điện tử hoặc mã QR khi check-in.</li>
+                    <li>Tuân thủ các quy định của ban tổ chức.</li>
+                </ul>
+            </section>
+        </div>
+
+        <div class="col-lg-4">
+            <form id="ticketForm"
+                  class="ticket-panel"
+                  method="get"
+                  action="{{ url_for('webui.checkout') }}">
+
+                <input type="hidden"
+                       name="event_id"
+                       value="{{ event.id }}">
+
+                <div class="ticket-panel-header">
+                    <h2>
+                        <i class="fa-solid fa-ticket me-1"></i>
+                        Chọn vé
+                    </h2>
+                    <p class="mb-0">Chọn loại vé và số lượng</p>
+                </div>
+
+                <div class="ticket-panel-body">
+                    {% for ticket in event.ticket_types %}
+                    <div class="ticket-option
+                        {% if ticket.current_stock <= 0 %}
+                            ticket-disabled
+                        {% endif %}">
+
+                        <div>
+                            <div class="ticket-name">
+                                {{ ticket.name }}
+
+                                {% if ticket.current_stock > 0 %}
+                                <span class="ticket-status available">
+                                    Còn vé
+                                </span>
+                                {% else %}
+                                <span class="ticket-status unavailable">
+                                    Hết vé
+                                </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="ticket-price">
+                                {{ "{:,.0f}".format(ticket.price)
+                                .replace(",", ".") }}đ
+                            </div>
+                        </div>
+
+                        {% if ticket.current_stock > 0 %}
+                        <div class="quantity-control">
+                            <button type="button"
+                                    class="quantity-button minus"
+                                    data-target="ticket-{{ ticket.id }}">−
+                            </button>
+
+                            <input id="ticket-{{ ticket.id }}"
+                                   type="number"
+                                   name="ticket_{{ ticket.id }}"
+                                   class="ticket-quantity"
+                                   value="0"
+                                   min="0"
+                                   max="{{ ticket.current_stock }}"
+                                   data-price="{{ ticket.price }}"
+                                   readonly>
+
+                            <button type="button"
+                                    class="quantity-button plus"
+                                    data-target="ticket-{{ ticket.id }}">+
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        Sự kiện hiện chưa có loại vé.
+                    </div>
+                    {% endfor %}
+
+                    <div class="ticket-divider"></div>
+
+                    <div class="ticket-total">
+                        <span id="ticketCount">Tạm tính</span>
+                        <strong id="subtotal">0đ</strong>
+                    </div>
+
+                    <div id="ticketError"
+                         class="alert alert-danger mt-2 d-none">
+                        Vui lòng chọn ít nhất một vé.
+                    </div>
+
+                    {% if is_logged_in() %}
+                    <button id="checkoutButton"
+                            type="submit"
+                            class="checkout-button">
+                        Tiếp tục
+                    </button>
+                    {% else %}
+                    <a href="{{ url_for('simplelogin.login') }}"
+                       class="checkout-button text-center text-decoration-none d-block">
+                        Đăng nhập để mua vé
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('webui.static',filename='js/event-detail.js') }}"></script>
+{% endblock %}

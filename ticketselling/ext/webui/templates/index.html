@@ -167,7 +167,7 @@ Trang chủ
 
     <div class="row mt-4">
 
-        {% for i in range(4) %}
+        {% for event in events %}
 
         <div class="col-lg-3 col-md-6 mb-4">
 
@@ -178,34 +178,64 @@ Trang chủ
 
                 <div class="card-body">
 
-                    <span class="badge bg-danger">
-                        Concert
+                    <span class="badge bg-primary">
+                        {% if event.category %}
+                            {{ event.category.name }}
+                        {% else %}
+                            Sự kiện
+                        {% endif %}
                     </span>
 
                     <h5 class="mt-3">
-                        Summer Music Festival
+                        {{event.name}}
                     </h5>
 
-                    <p class="text-muted">
-                        20/08/2026
+                    <p class="text-muted mb-2">
+                        {% if event.start_time %}
+                        {{ event.start_time.strftime("%d/%m/%Y") }}
+                        {% else %}
+                        Chưa cập nhật ngày
+                        {% endif %}
                     </p>
 
                     <p>
-                        TP Hồ Chí Minh
+                        {{ event.location or "Chưa cập nhật địa điểm" }}
                     </p>
 
-                    <h5 class="text-primary">
-                        799.000đ
-                    </h5>
+                    {% if event.ticket_types %}
+                        {% set prices = event.ticket_types
+                            | map(attribute="price")
+                            | list %}
+                        <h5 class="text-primary">
+                            Từ
+                            {{
+                            "{:,.0f}".format(prices | min)
+                            .replace(",", ".")
+                            }}đ
+                        </h5>
+                    {% else %}
+                        <h5 class="text-muted">
+                         Chưa mở bán vé
+                        </h5>
+                    {% endif %}
 
-                    <button class="btn btn-primary w-100">
-                        Mua vé
-                    </button>
+                    <a
+                            href="{{ url_for('webui.event_detail', event_id=event.id) }}"
+                            class="btn btn-primary w-100"
+                    >
+                        Xem chi tiết
+                    </a>
 
                 </div>
 
             </div>
 
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Hiện chưa có sự kiện đang hoạt động.
+            </div>
         </div>
 
         {% endfor %}
