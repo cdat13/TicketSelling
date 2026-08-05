@@ -5,6 +5,9 @@ from werkzeug.security import generate_password_hash
 from ticketselling.ext.database import db
 from ticketselling.models import Event, EventCategory, TicketType, User
 
+from sqlalchemy import text
+
+
 
 USERS = [
     {
@@ -125,7 +128,7 @@ EVENTS = [
             "Vở kịch kể về hành trình gặp lại những ký ức cũ của một gia đình sau "
             "nhiều năm xa cách. Nội dung gần gũi, phù hợp với khán giả trưởng thành."
         ),
-        "location": "Nhà hát Thành phố, TP. Hồ Chí Minh",
+        "location": "Nhà hát Thành phố, Hà Nội",
         "start_time": datetime(2026, 9, 12, 19, 30),
         "end_time": datetime(2026, 9, 12, 21, 30),
         "sale_start": datetime(2026, 8, 1, 8, 0),
@@ -147,7 +150,7 @@ EVENTS = [
             "tìm hiểu cách tích hợp trí tuệ nhân tạo vào ứng dụng.\n\n"
             "Người tham dự nên mang theo laptop để thực hành."
         ),
-        "location": "Đại học Mở TP. Hồ Chí Minh",
+        "location": "Đại học Mở, TP. Hồ Chí Minh",
         "start_time": datetime(2026, 9, 20, 8, 30),
         "end_time": datetime(2026, 9, 20, 16, 30),
         "sale_start": datetime(2026, 8, 10, 8, 0),
@@ -330,3 +333,5 @@ def seed_data():
     except Exception:
         db.session.rollback()
         raise
+
+

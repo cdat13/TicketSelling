@@ -1,11 +1,17 @@
 [default]
-DEBUG = false
-FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
-FLASK_ADMIN_SWATCH = 'cerulean'
-SQLALCHEMY_DATABASE_URI = 'sqlite:///development.db'
+DEBUG = true
+
 TITLE = "ticketselling"
+
 SECRET_KEY = "Pl3453Ch4ng3"
-PASSWORD_SCHEMES = ['pbkdf2_sha512', 'md5_crypt']
+
+FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
+FLASK_ADMIN_SWATCH = "cerulean"
+
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:CongDat1304%40@127.0.0.1:3306/ticket_selling"
+
+PASSWORD_SCHEMES = ["pbkdf2_sha512", "md5_crypt"]
+
 EXTENSIONS = [
     "flask_bootstrap:Bootstrap",
     "ticketselling.ext.database:init_app",
@@ -41,7 +47,7 @@ DEBUG_TB_PANELS = [
 ]
 
 [testing]
-SQLALCHEMY_DATABASE_URI = 'sqlite:///testing.db'
+SQLALCHEMY_DATABASE_URI = "@format mysql+pymysql://{env[DB_USER]}:{env[DB_PASSWORD]}@{env[DB_HOST]}:{env[DB_PORT]}/{env[DB_NAME]}"
 
 [production]
 SQLALCHEMY_DATABASE_URI = "@format mysql+pymysql://{env[DB_USER]}:{env[DB_PASSWORD]}@{env[DB_HOST]}:{env[DB_PORT]}/{env[DB_NAME]}"

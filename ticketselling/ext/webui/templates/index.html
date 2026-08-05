@@ -51,65 +51,84 @@ Trang chủ
 
 </section>
 <!-- Search -->
-<section class="search-box">
-    <div class="container">
+<form method="GET"
+      action="{{ url_for('webui.event_list') }}"
+      class="row g-3 align-items-center">
 
-        <div class="card search-card shadow-lg border-0">
+    <!-- Theo tên -->
+    <div class="col-lg-5">
 
-            <div class="card-body p-5">
-
-                <div class="text-center mb-4">
-
-                    <h1 class="fw-bold">
-                        Đặt vé sự kiện dễ dàng
-                    </h1>
-
-                    <p class="text-muted">
-                        Concert • Hội thảo • Thể thao • Sân khấu
-                    </p>
-
-                </div>
-
-                <form class="row g-3 align-items-center">
-
-                    <div class="col-lg-5">
-                        <input type="text"
-                               class="form-control"
-                               placeholder="Tìm kiếm sự kiện...">
-                    </div>
-
-                    <div class="col-lg-3">
-                        <select class="form-select">
-                            <option>Tất cả địa điểm</option>
-                            <option>TP.HCM</option>
-                            <option>Hà Nội</option>
-                        </select>
-                    </div>
-
-                    <div class="col-lg-2">
-                        <select class="form-select">
-                            <option>Thể loại</option>
-                            <option>Concert</option>
-                            <option>Hội thảo</option>
-                        </select>
-                    </div>
-
-                    <div class="col-lg-2">
-                        <button class="btn btn-primary w-100">
-                            <i class="fa-solid fa-magnifying-glass"></i>
-                            Tìm kiếm
-                        </button>
-                    </div>
-
-                </form>
-
-            </div>
-
-        </div>
+        <input
+            type="text"
+            class="form-control"
+            name="keyword"
+            value="{{ keyword }}"
+            placeholder="Tìm kiếm sự kiện...">
 
     </div>
-</section>
-<!-- Categories -->
+
+    <!-- Thành phố -->
+    <div class="col-lg-3">
+
+        <select
+            class="form-select"
+            name="location">
+
+            {% for location in locations %}
+
+            <option
+                value="{{ location }}"
+                {% if selected_location == location %}selected{% endif %}>
+
+                {{ location }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+    <!-- Thể loại -->
+    <div class="col-lg-2">
+
+        <select
+            class="form-select"
+            name="category">
+
+            {% for category in categories %}
+
+            <option
+                value="{{ category.id }}"
+                {% if selected_category == category.id %}selected{% endif %}>
+
+                {{ category.name }}
+
+            </option>
+
+            {% endfor %}
+
+        </select>
+
+    </div>
+
+    <!-- Button -->
+    <div class="col-lg-2">
+
+        <button
+            type="submit"
+            class="btn btn-primary w-100">
+
+            <i class="fa-solid fa-magnifying-glass me-2"></i>
+            Tìm kiếm
+
+        </button>
+
+    </div>
+
+</form>
+    '<!-- Categories -->
 <section class="container mt-5">
 
     <h2 class="mb-4">
@@ -149,15 +168,15 @@ Trang chủ
     </div>
 
 </section>
-<!-- Events -->
 
+<!-- Events -->
 <section class="container mt-5">
 
     <div class="d-flex justify-content-between">
 
         <h2>Sự kiện nổi bật</h2>
 
-        <a href="#">
+        <a href="{{ url_for('webui.event_list') }}">
             <button class="btn btn-primary w-100">
                 Xem tất cả
             </button>
@@ -167,7 +186,7 @@ Trang chủ
 
     <div class="row mt-4">
 
-        {% for event in events %}
+        {% for event in featured_events %}
 
         <div class="col-lg-3 col-md-6 mb-4">
 
@@ -180,9 +199,9 @@ Trang chủ
 
                     <span class="badge bg-primary">
                         {% if event.category %}
-                            {{ event.category.name }}
+                        {{ event.category.name }}
                         {% else %}
-                            Sự kiện
+                        Sự kiện
                         {% endif %}
                     </span>
 
@@ -203,26 +222,24 @@ Trang chủ
                     </p>
 
                     {% if event.ticket_types %}
-                        {% set prices = event.ticket_types
-                            | map(attribute="price")
-                            | list %}
-                        <h5 class="text-primary">
-                            Từ
-                            {{
+                    {% set prices = event.ticket_types
+                    | map(attribute="price")
+                    | list %}
+                    <h5 class="text-primary">
+                        Từ
+                        {{
                             "{:,.0f}".format(prices | min)
                             .replace(",", ".")
-                            }}đ
-                        </h5>
+                        }}đ
+                    </h5>
                     {% else %}
-                        <h5 class="text-muted">
-                         Chưa mở bán vé
-                        </h5>
+                    <h5 class="text-muted">
+                        Chưa mở bán vé
+                    </h5>
                     {% endif %}
 
-                    <a
-                            href="{{ url_for('webui.event_detail', event_id=event.id) }}"
-                            class="btn btn-primary w-100"
-                    >
+                    <a href="{{ url_for('webui.event_detail', event_id=event.id) }}"
+                       class="btn btn-primary w-100">
                         Xem chi tiết
                     </a>
 

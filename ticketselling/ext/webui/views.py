@@ -1,14 +1,126 @@
 from flask import flash, render_template, request, redirect, url_for
 from flask_simplelogin import login_required
+
 from ticketselling.models import Event
+from ticketselling.models import EventCategory
+
 from ticketselling.ext.auth import create_user
 
 
+from sqlalchemy import func
+
 def index():
-    events = Event.query.filter_by(status="ACTIVE").limit(4).all()
 
-    return render_template("index.html", events=events)
+    keyword = request.args.get("keyword", "").strip()
+    location = request.args.get("location", "").strip()
+    category = request.args.get("category", "").strip()
 
+    query = Event.query.filter(
+        Event.status == "ACTIVE"
+    )
+
+    if keyword:
+        query = query.filter(
+            Event.name.ilike(f"%{keyword}%")
+        )
+
+    if location:
+        query = query.filter(
+            Event.location.ilike(f"%{location}%")
+        )
+
+    if category:
+        query = query.filter(
+            Event.category_id == int(category)
+        )
+
+    # Kết quả tìm kiếm
+    events = query.order_by(Event.start_time).all()
+
+    # sự kiện nổi bật
+    featured_events = (
+        Event.query.filter(Event.status == "ACTIVE")
+        .order_by(Event.id.asc())
+        .limit(4)
+        .all()
+    )
+
+    raw_locations = (
+        Event.query.with_entities(Event.location)
+        .filter(Event.location.isnot(None))
+        .distinct()
+        .all()
+    )
+
+    locations = sorted({
+        item[0].split(",")[-1].strip()
+        for item in raw_locations
+        if item[0]
+    })
+
+    categories = EventCategory.query.order_by(
+        EventCategory.name
+    ).all()
+
+    return render_template(
+        "index.html",
+        events=events,
+        featured_events=featured_events,
+        categories=categories,
+        locations=locations,
+        keyword=keyword,
+        selected_location=location,
+        selected_category=int(category) if category else None
+    )
+
+
+def event_list():
+
+    keyword = request.args.get("keyword", "").strip()
+    location = request.args.get("location", "")
+    category = request.args.get("category", "")
+
+    query = Event.query.filter(
+        Event.status == "ACTIVE"
+    )
+
+    if keyword:
+        query = query.filter(
+            Event.name.ilike(f"%{keyword}%")
+        )
+
+    if location:
+        query = query.filter(
+            Event.location.ilike(f"%{location}")
+        )
+
+    if category:
+        query = query.filter(
+            Event.category_id == int(category)
+        )
+
+    events = (
+        query.order_by(Event.start_time)
+        .all()
+    )
+
+    locations = Event.query.with_entities(Event.location).distinct().all()
+
+    locations = sorted(
+        [x[0].strip() for x in locations]
+    )
+
+    categories = EventCategory.query.all()
+
+    return render_template(
+        "event/list.html",
+        events=events,
+        keyword=keyword,
+        categories=categories,
+        locations=locations,
+        selected_location=location,
+        selected_category=int(category) if category else None
+    )
 
 @login_required
 def secret():

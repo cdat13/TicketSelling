@@ -1,0 +1,233 @@
+﻿{% extends "layout/base.html" %}
+
+{% block title %}
+Danh sách sự kiện
+{% endblock %}
+
+{% block content %}
+
+<section class="search-box">
+
+    <div class="container">
+
+        <div class="card search-card shadow-lg border-0">
+
+            <div class="card-body p-5">
+
+                <h2 class="text-center fw-bold mb-4">
+                    Danh sách sự kiện
+                </h2>
+
+                <form method="GET"
+                      action="{{ url_for('webui.event_list') }}"
+                      class="row g-3 align-items-center">
+
+                    <div class="col-lg-5">
+
+                        <input type="text"
+                               class="form-control"
+                               name="keyword"
+                               value="{{ keyword }}"
+                               placeholder="Tìm kiếm sự kiện...">
+
+                    </div>
+
+                    <div class="col-lg-3">
+
+                        <select class="form-select"
+                                name="location">
+
+                            <option value="">
+                                Địa điểm
+                            </option>
+
+                            {% for location in locations %}
+
+                            <option value="{{ location }}"
+                                    {% if selected_location==location %}selected{% endif %}>
+
+                                {{ location }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2">
+
+                        <select class="form-select"
+                                name="category">
+
+                            <option value="">
+                                Thể loại
+                            </option>
+
+                            {% for category in categories %}
+
+                            <option value="{{ category.id }}"
+                                    {% if selected_category==category.id %}selected{% endif %}>
+
+                                {{ category.name }}
+
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-lg-2">
+
+                        <button type="submit"
+                                class="btn btn-primary w-100">
+
+                            <i class="fa-solid fa-magnifying-glass me-2"></i>
+
+                            Tìm kiếm
+
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2 class="mb-0">
+            Tất cả sự kiện
+        </h2>
+
+        <span class="badge bg-primary fs-6">
+            {{ events|length }} sự kiện
+        </span>
+
+    </div>
+
+    <div class="row">
+
+        {% for event in events %}
+
+        <div class="col-lg-3 col-md-6 mb-4">
+
+            <div class="card event-card h-100 shadow-sm">
+
+                <img src="{{ url_for('webui.static',
+                filename=event.banner or 'img/demo.png') }}"
+                     class="card-img-top"
+                     alt="{{ event.name }}">
+
+                <div class="card-body d-flex flex-column">
+
+                    <span class="badge bg-primary mb-2">
+
+                        {% if event.category %}
+
+                        {{ event.category.name }}
+
+                        {% else %}
+
+                        Sự kiện
+
+                        {% endif %}
+
+                    </span>
+
+                    <h5 class="card-title">
+
+                        {{ event.name }}
+
+                    </h5>
+
+                    <p class="text-muted mb-2">
+
+                        <i class="fa-regular fa-calendar"></i>
+
+                        {% if event.start_time %}
+                        {{ event.start_time.strftime("%d/%m/%Y") }}
+                        {% endif %}
+
+                    </p>
+
+                    <p class="text-muted mb-3">
+
+                        <i class="fa-solid fa-location-dot"></i>
+
+                        {{ event.location }}
+
+                    </p>
+
+                    {% if event.ticket_types %}
+
+                    {% set prices = event.ticket_types
+                    | map(attribute='price')
+                    | list %}
+
+                    <h5 class="text-primary mb-3">
+
+                        Từ
+
+                        {{ "{:,.0f}".format(prices|min).replace(",", ".") }}đ
+
+                    </h5>
+
+                    {% else %}
+
+                    <h5 class="text-secondary mb-3">
+
+                        Chưa mở bán
+
+                    </h5>
+
+                    {% endif %}
+
+                    <div class="mt-auto">
+
+                        <a href="{{ url_for('webui.event_detail',
+                                event_id=event.id) }}"
+                           class="btn btn-primary w-100">
+
+                            Xem chi tiết
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <div class="col-12">
+
+            <div class="alert alert-warning text-center">
+
+                Không tìm thấy sự kiện phù hợp.
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endblock %}

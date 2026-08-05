@@ -5,15 +5,7 @@
            href="{{ url_for('webui.index') }}">
             TicketSelling
         </a>
-
-        <form class="d-flex flex-grow-1 mx-4">
-            <input
-                    class="form-control rounded-pill"
-                    type="search"
-                    placeholder="Tìm kiếm sự kiện, địa điểm..."
-                    aria-label="Search">
-        </form>
-
+        
         <div class="ms-auto d-flex align-items-center gap-2">
             {% if is_logged_in() %}
             <a href="{{ url_for('simplelogin.logout') }}" class="btn btn-outline-danger">
