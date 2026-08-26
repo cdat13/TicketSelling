@@ -1,5 +1,5 @@
 [default]
-DEBUG = true
+DEBUG =true
 
 TITLE = "ticketselling"
 
@@ -8,7 +8,8 @@ SECRET_KEY = "Pl3453Ch4ng3"
 FLASK_ADMIN_TEMPLATE_MODE = "bootstrap3"
 FLASK_ADMIN_SWATCH = "cerulean"
 
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:CongDat1304%40@127.0.0.1:3306/ticket_selling"
+#SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:CongDat1304%40@127.0.0.1:3306/ticket_selling"
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@127.0.0.1:3306/ticket_selling"
 
 PASSWORD_SCHEMES = ["pbkdf2_sha512", "md5_crypt"]
 
@@ -29,9 +30,10 @@ EXTENSIONS = [
 ]
 TEMPLATES_AUTO_RELOAD = true
 DEBUG = true
-DEBUG_TOOLBAR_ENABLED = true
+DEBUG_TOOLBAR_ENABLED = false
+DEBUG_TB_ENABLED = false
 DEBUG_TB_INTERCEPT_REDIRECTS = false
-DEBUG_TB_PROFILER_ENABLED = true
+DEBUG_TB_PROFILER_ENABLED = false
 DEBUG_TB_TEMPLATE_EDITOR_ENABLED = true
 DEBUG_TB_PANELS = [
     "flask_debugtoolbar.panels.versions.VersionDebugPanel",

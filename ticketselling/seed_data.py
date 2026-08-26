@@ -15,30 +15,35 @@ USERS = [
         "email": "admin@ticketselling.local",
         "full_name": "Quản trị viên",
         "password": "Admin@123",
+        "role":"admin"
     },
     {
         "username": "organizer_music",
         "email": "music@ticketselling.local",
         "full_name": "VietMusic Entertainment",
         "password": "123456",
+        "role":"organizer"
     },
     {
         "username": "organizer_event",
         "email": "event@ticketselling.local",
         "full_name": "VietEvent Corporation",
         "password": "123456",
+        "role":"organizer"
     },
     {
         "username": "organizer_sport",
         "email": "sport@ticketselling.local",
         "full_name": "Vietnam Sport Center",
         "password": "123456",
+        "role":"organizer"
     },
     {
         "username": "customer_test",
         "email": "customer@ticketselling.local",
         "full_name": "Khách hàng thử nghiệm",
         "password": "123456",
+        "role":"user"
     },
 ]
 
@@ -238,11 +243,13 @@ def _seed_users():
                 email=item["email"],
                 full_name=item["full_name"],
                 password=generate_password_hash(item["password"]),
+                role=item.get("role", "user"),
             )
             db.session.add(user)
         else:
             user.email = item["email"]
             user.full_name = item["full_name"]
+            user.role = item.get("role", "user")
 
         users[item["username"]] = user
 
@@ -277,6 +284,13 @@ def _seed_events(users, categories):
             event = Event(name=item["name"])
             db.session.add(event)
 
+        organizer = users.get(item["organizer"])
+        category = categories.get(item["category"])
+
+        if not organizer or not category:
+            print(f"⚠️ Bỏ qua sự kiện '{item['name']}': Không tìm thấy organizer hoặc category hợp lệ.")
+            continue
+
         event.organizer = users[item["organizer"]]
         event.category = categories[item["category"]]
         event.banner = item["banner"]
@@ -286,7 +300,7 @@ def _seed_events(users, categories):
         event.end_time = item["end_time"]
         event.sale_start = item["sale_start"]
         event.sale_end = item["sale_end"]
-        event.status = item["status"]
+        event.status = item.get("status", "ACTIVE")
 
         db.session.flush()
         event_count += 1

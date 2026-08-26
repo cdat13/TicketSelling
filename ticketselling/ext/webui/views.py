@@ -1,11 +1,16 @@
+from collections import defaultdict
+
 from flask import flash, render_template, request, redirect, url_for
 from flask_simplelogin import login_required
-
-from ticketselling.models import Event
 from ticketselling.models import EventCategory
-
 from ticketselling.ext.auth import create_user
-
+from datetime import datetime, timedelta
+from flask import render_template, request, redirect, url_for, flash
+from ticketselling.ext.database import db
+from ticketselling.models import Event, Ticket, User
+from ticketselling.ext.qr_utils import generate_qr_base64_png
+from . import bp
+from flask import jsonify
 
 from sqlalchemy import func
 
@@ -122,16 +127,6 @@ def event_list():
         selected_category=int(category) if category else None
     )
 
-@login_required
-def secret():
-    return "This can be seen only if user is logged in"
-
-
-@login_required(username="admin")
-def only_admin():
-    return "only admin user can see this text"
-
-
 def register():
     err_msg = None
 
@@ -198,3 +193,218 @@ def event_detail(event_id):
 
 def checkout():
     return render_template("checkout/checkout.html")
+
+@login_required
+def secret():
+    return "This can be seen only if user is logged in"
+
+
+@login_required(username="admin")
+def only_admin():
+    return "only admin user can see this text"
+
+
+def approve_organizer(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.role == "pending_organizer":
+        user.role = "organizer"
+        db.session.commit()
+        flash(f"Đã duyệt cấp quyền Nhà tổ chức cho: {user.username}!", "success")
+    else:
+        flash("Tài khoản này không nằm trong danh sách chờ duyệt.", "warning")
+
+    return redirect(url_for("admin.user_list"))
+
+def dashboard():
+    total_events = Event.query.filter_by(status="ACTIVE").count()
+    active_tickets = Ticket.query.filter(Ticket.status != "cancelled").all()
+    return render_template(
+        "admin/dashboard.html",
+        total_events=total_events,
+        tickets_sold=len(active_tickets),
+        revenue=sum(t.event.ticket_price for t in active_tickets),
+    )
+
+def admin_event_list():
+    events = Event.query.order_by(Event.id.desc()).all()
+    return render_template("admin/event_list.html", events=events)
+
+def user_list():
+    return render_template("admin/user_list.html", users=User.query.order_by(User.id.desc()).all())
+
+def event_form(event_id=None):
+    event = Event.query.get_or_404(event_id) if event_id else None
+    organizers = User.query.filter_by(role="organizer").all()
+
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        date_str = request.form.get("date")
+
+        if not name or not date_str:
+            flash("Vui lòng nhập đầy đủ tên sự kiện và ngày giờ tổ chức.", "danger")
+            return render_template("admin/event_form.html", event=event, organizers=organizers)
+
+        try:
+            start_dt = datetime.strptime(date_str, "%Y-%m-%dT%H:%M")
+        except ValueError:
+            flash("Định dạng ngày giờ không hợp lệ.", "danger")
+            return render_template("admin/event_form.html", event=event, organizers=organizers)
+
+        if event is None:
+            event = Event()
+            db.session.add(event)
+
+        event.name = request.form.get("name").strip()
+        event.description = request.form.get("description", "").strip()
+        event.location = request.form.get("location", "").strip()
+        event.start_time = start_dt
+        event.ticket_capacity = int(request.form.get("ticket_capacity") or 0)
+        event.ticket_price = int(request.form.get("ticket_price") or 0)
+        event.status = request.form.get("status","DRAFT")
+        event.organizer_id = int(request.form.get("organizer_id")) if request.form.get("organizer_id") else None
+
+        db.session.commit()
+        flash(f"Đã lưu sự kiện '{event.name}'.", "success")
+        return redirect(url_for("admin.event_list"))
+
+    return render_template("admin/event_form.html", event=event, organizers=organizers)
+
+def event_delete(event_id):
+    event = Event.query.get_or_404(event_id)
+    db.session.delete(event)
+    db.session.commit()
+    flash("Đã xoá sự kiện.", "info")
+    return redirect(url_for("admin.event_list"))
+
+def ticket_qr(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+    qr_base64 = generate_qr_base64_png(ticket.ticket_code)
+    return render_template("admin/ticket_qr.html", ticket=ticket, qr_base64=qr_base64)
+
+def ticket_list():
+    status_filter = request.args.get("status", "")
+    event_filter = request.args.get("event_id", "")
+
+    query = Ticket.query
+    if status_filter:
+        query = query.filter_by(status=status_filter)
+    if event_filter:
+        query = query.filter_by(event_id=event_filter)
+
+    tickets = query.order_by(Ticket.created_at.desc()).all()
+    events = Event.query.order_by(Event.name.asc()).all()
+    return render_template(
+        "admin/ticket_list.html",
+        tickets=tickets,
+        events=events,
+        status_filter=status_filter,
+        event_filter=event_filter,
+    )
+
+def ticket_cancel(ticket_id):
+    ticket = Ticket.query.get_or_404(ticket_id)
+
+    if ticket.status == "used":
+        flash("Vé đã sử dụng, không thể hủy.", "danger")
+        return redirect(url_for("webui.ticket_list"))
+
+    time_since_bought = datetime.now() - ticket.created_at
+    if time_since_bought > timedelta(hours=24):
+        flash("Đã quá 24h, bạn không thể hủy vé này nữa.", "warning")
+        return redirect(url_for("webui.ticket_list"))
+
+    ticket.status = "cancelled"
+    db.session.commit()
+    flash("Hủy vé thành công.", "success")
+    return redirect(url_for("webui.ticket_list"))
+
+def revenue():
+    active_tickets = Ticket.query.filter(Ticket.status != "cancelled").all()
+    organizer_stats = defaultdict(int)
+    grand_total = 0
+    organizer_stats = {}
+
+    for ticket in active_tickets:
+        evt = ticket.event
+        grand_total += evt.ticket_price
+        org_name = evt.organizer.username if evt.organizer else "Admin (Nội bộ)"
+
+        if org_name not in organizer_stats:
+            organizer_stats[org_name] = {
+                "sold": 0,
+                "revenue": 0,
+                "events_list": set()
+            }
+
+        organizer_stats[org_name]["sold"] += 1
+        organizer_stats[org_name]["revenue"] += evt.ticket_price
+        organizer_stats[org_name]["events_list"].add(evt.name)
+
+    return render_template("admin/revenue.html",
+                           organizer_stats=organizer_stats,
+                           grand_total=grand_total)
+
+def scan_qr():
+    return render_template("checkin/scan_qr.html")
+
+def checkin_process():
+    ticket_code = request.form.get("ticket_code", "").strip()
+    if not ticket_code:
+        flash("Không đọc được mã vé, vui lòng thử lại.", "warning")
+        return redirect(url_for("webui.scan_qr"))
+
+    ticket = Ticket.query.filter_by(ticket_code=ticket_code).first()
+
+    if not ticket:
+        flash("Mã vé không tồn tại trong hệ thống!", "danger")
+    elif ticket.status == "cancelled":
+        flash("Cảnh báo: Vé này đã bị huỷ!", "danger")
+    elif ticket.status == "used":
+        check_time = ticket.checked_in_at.strftime("%H:%M %d/%m/%Y") if ticket.checked_in_at else "trước đó"
+        flash(f"Cảnh báo: Vé đã bị sử dụng vào lúc {check_time}!", "warning")
+    else:
+        ticket.status = "used"
+        ticket.checked_in_at = datetime.now()
+        db.session.commit()
+        flash(f"Soát vé thành công! Khách: {ticket.holder_name} - Sự kiện: {ticket.event.name}", "success")
+
+    return redirect(url_for("webui.scan_qr"))
+
+def api_check_ticket():
+    data = request.get_json() or {}
+    ticket_code = data.get("ticket_code", "").strip()
+
+    if not ticket_code:
+        return jsonify({"valid": False, "message": "Không nhận được mã vé!"}), 400
+
+    ticket = Ticket.query.filter_by(ticket_code=ticket_code).first()
+
+    if not ticket:
+        return jsonify({"valid": False, "message": "Mã vé không tồn tại!"})
+
+    if ticket.status == "cancelled":
+        return jsonify({
+            "valid": False,
+            "message": "Vé này đã bị hủy!",
+            "customer_name": ticket.holder_name
+        })
+
+    if ticket.status == "used":
+        check_time = ticket.checked_in_at.strftime("%H:%M %d/%m/%Y") if ticket.checked_in_at else "trước đó"
+        return jsonify({
+            "valid": False,
+            "message": f"Vé đã được sử dụng lúc {check_time}!",
+            "customer_name": ticket.holder_name
+        })
+
+    ticket.status = "used"
+    ticket.checked_in_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({
+        "valid": True,
+        "customer_name": ticket.holder_name,
+        "event_name": ticket.event.name,
+        "message": "Check-in thành công!"
+    })
+

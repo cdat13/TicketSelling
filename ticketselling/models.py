@@ -14,6 +14,7 @@ class User(db.Model, SerializerMixin):
     password = db.Column(db.String(512))
     email = db.Column(db.String(120),nullable = False)
     full_name = db.Column(db.String(150),nullable = False)
+    role = db.Column(db.String(20))
 
 class EventCategory(db.Model, SerializerMixin):
     __tablename__ = "event_categories"
@@ -35,7 +36,8 @@ class Event(db.Model, SerializerMixin):
     banner = db.Column(db.String(255))
     description = db.Column(db.Text)
     location = db.Column(db.String(255))
-
+    ticket_capacity = db.Column(db.Integer, default=0)
+    ticket_price = db.Column(db.Integer, default=0)
     start_time = db.Column(db.DateTime)
     end_time = db.Column(db.DateTime)
 
@@ -47,9 +49,45 @@ class Event(db.Model, SerializerMixin):
     organizer = db.relationship("User",backref="organized_events")
     category = db.relationship("EventCategory",backref="events")
 
+    tickets = db.relationship("Ticket", back_populates="event", lazy=True, cascade="all, delete-orphan")
+
+    @property
+    def tickets_sold(self):
+        return len([t for t in self.tickets if t.status != "cancelled"])
+
+    @property
+    def total_revenue(self):
+        return self.tickets_sold * (self.ticket_price or 0)
+
+    @property
+    def total_capacity(self):
+        if self.ticket_types:
+            return sum([t.max_quantity for t in self.ticket_types])
+        return self.ticket_capacity
 
     def __repr__(self):
         return f"<Event {self.name}"
+
+class Ticket(db.Model):
+    __tablename__ = "tickets"
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_code = db.Column(db.String(140), unique=True, nullable=False)
+    event_id = db.Column(db.Integer, db.ForeignKey("events.id"), nullable=False)
+    holder_name = db.Column(db.String(100), nullable=False)
+    holder_email = db.Column(db.String(120), nullable=False)
+    status = db.Column(db.String(20), default="valid")  # valid / used / cancelled
+    checked_in_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    event = db.relationship("Event", back_populates="tickets")
+
+    @staticmethod
+    def generate_code():
+        import uuid
+        return uuid.uuid4().hex
+
+    def __repr__(self):
+        return f"<Ticket {self.ticket_code[:8]}...>"
 
 class TicketType(db.Model, SerializerMixin):
     __tablename__ = "ticket_types"

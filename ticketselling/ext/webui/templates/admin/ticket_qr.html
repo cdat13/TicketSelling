@@ -1,0 +1,23 @@
+{% extends "layout/admin_base.html" %}
+
+{% block title %}Vé #{{ ticket.id }} - Ticket Admin{% endblock %}
+{% block page_heading %}Mã QR vé điện tử{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow-sm text-center">
+            <div class="card-body p-4">
+                <h5>{{ ticket.event.title }}</h5>
+                <p class="text-muted">{{ ticket.holder_name }} — {{ ticket.holder_email }}</p>
+                <img src="data:image/png;base64,{{ qr_base64 }}" style="width:220px;height:220px;margin:14px auto;" alt="QR vé">
+                <p class="small text-muted" style="word-break:break-all;">{{ ticket.ticket_code }}</p>
+                <span class="badge {{ 'bg-success' if ticket.status == 'valid' else 'bg-secondary' }}">{{ ticket.status }}</span>
+                <div class="mt-3">
+                    <a href="{{ url_for('admin.event_list') }}" class="btn btn-sm btn-outline-secondary">&larr; Quay lại</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

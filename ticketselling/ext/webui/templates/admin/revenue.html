@@ -1,0 +1,76 @@
+{% extends "layout/admin_base.html" %}
+
+{% block title %}Doanh thu - Ticket Admin{% endblock %}
+{% block page_heading %}Theo dõi Doanh thu{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="btn-group">
+        <a href="{{ url_for('admin.revenue', period='day') }}" class="btn btn-sm {{ 'btn-primary' if period == 'day' else 'btn-outline-primary' }}">Theo ngày</a>
+        <a href="{{ url_for('admin.revenue', period='month') }}" class="btn btn-sm {{ 'btn-primary' if period == 'month' else 'btn-outline-primary' }}">Theo tháng</a>
+        <a href="{{ url_for('admin.revenue', period='year') }}" class="btn btn-sm {{ 'btn-primary' if period == 'year' else 'btn-outline-primary' }}">Theo năm</a>
+    </div>
+    <div class="card shadow-sm p-2 px-3 text-center">
+        <div class="text-muted small">Tổng doanh thu</div>
+        <div class="fw-bold text-success">{{ "{:,}".format(grand_total) }} đ</div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white py-3"><h6 class="m-0 fw-bold">Doanh thu theo thời gian</h6></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead class="table-light"><tr><th>Thời điểm</th><th>Số vé bán</th><th>Doanh thu</th></tr></thead>
+                <tbody>
+                    {% for row in time_rows %}
+                    <tr>
+                        <td>{{ row.period_label or "Không rõ thời gian" }}</td>
+                        <td>{{ row.tickets_sold }}</td>
+                        <td class="fw-bold text-success">{{ "{:,}".format(row.revenue or 0) }} đ</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3" class="text-center text-muted py-3">Chưa có dữ liệu.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3"><h6 class="m-0 fw-bold">Doanh thu theo sự kiện</h6></div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Nhà tổ chức</th>
+                        <th>Các sự kiện đã bán</th>
+                        <th>Số vé đã bán</th>
+                        <th>Tổng doanh thu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for org_name, stats in organizer_stats.items() %}
+                    <tr>
+                        <td><strong>{{ org_name }}</strong></td>
+                        <td>
+                            {{ stats.events_list | join(", ") }}
+                        </td>
+                        <td>{{ stats.sold }} vé</td>
+                        <td class="text-success fw-bold">{{ "{:,.0f}".format(stats.revenue) }} VNĐ</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="3" class="text-end">Tổng cộng toàn hệ thống:</th>
+                        <th class="text-danger fs-5">{{ "{:,.0f}".format(grand_total) }} VNĐ</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

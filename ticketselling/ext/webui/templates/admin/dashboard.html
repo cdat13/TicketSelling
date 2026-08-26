@@ -1,0 +1,33 @@
+{% extends "layout/admin_base.html" %}
+
+{% block title %}Tổng quan - Ticket Admin{% endblock %}
+{% block page_heading %}Thống kê hệ thống{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-primary shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Sự kiện đang mở</h5>
+                <h2 class="display-5">{{ total_events }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-success shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Vé đã bán</h5>
+                <h2 class="display-5">{{ tickets_sold }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-4">
+        <div class="card text-white bg-warning shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">Doanh thu tạm tính</h5>
+                <h2 class="display-5">{{ "{:,}".format(revenue) }} đ</h2>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

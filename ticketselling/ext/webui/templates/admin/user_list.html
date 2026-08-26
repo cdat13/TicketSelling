@@ -1,0 +1,61 @@
+{% extends "layout/admin_base.html" %}
+
+{% block title %}Quản lý Người dùng - Ticket Admin{% endblock %}
+{% block page_heading %}Quản lý Người dùng{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+        <h6 class="m-0 fw-bold">Danh sách tài khoản hệ thống</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên người dùng</th>
+                        <th>Email</th>
+                        <th>Vai trò</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr>
+                        <td>#{{ u.id }}</td>
+                        <td class="fw-bold">{{ u.username }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            {% if u.role == 'admin' %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% elif u.role == 'organizer' %}
+                                <span class="badge bg-success">Nhà tổ chức</span>
+                            {% elif u.role == 'pending_organizer' %}
+                                <span class="badge bg-warning text-dark">Chờ duyệt Tổ chức</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Khách hàng</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <!-- ĐÃ ĐỒNG BỘ: Gọi đúng endpoint approve_organizer -->
+                            {% if u.role == 'pending_organizer' %}
+                            <form method="POST" action="{{ url_for('admin.approve_organizer', user_id=u.id) }}">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    Duyệt làm Nhà tổ chức
+                                </button>
+                            </form>
+                            {% else %}
+                                <span class="text-muted small">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted py-3">Chưa có người dùng nào.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

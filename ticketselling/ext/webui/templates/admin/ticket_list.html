@@ -1,0 +1,66 @@
+{% extends "layout/admin_base.html" %}
+
+{% block title %}Quản lý Vé - Ticket Admin{% endblock %}
+{% block page_heading %}Danh sách Vé{% endblock %}
+
+{% block content %}
+<form method="get" class="d-flex gap-2 mb-3">
+    <select name="event_id" class="form-select" style="max-width:260px;" onchange="this.form.submit()">
+        <option value="">Tất cả sự kiện</option>
+        {% for e in events %}
+        <option value="{{ e.id }}" {{ "selected" if event_filter|string == e.id|string }}>{{ e.title }}</option>
+        {% endfor %}
+    </select>
+    <select name="status" class="form-select" style="max-width:180px;" onchange="this.form.submit()">
+        <option value="">Tất cả trạng thái</option>
+        <option value="valid" {{ "selected" if status_filter == "valid" }}>Còn hiệu lực</option>
+        <option value="used" {{ "selected" if status_filter == "used" }}>Đã check-in</option>
+        <option value="cancelled" {{ "selected" if status_filter == "cancelled" }}>Đã huỷ</option>
+    </select>
+</form>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã vé</th>
+                        <th>Sự kiện</th>
+                        <th>Khách hàng</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in tickets %}
+                    <tr>
+                        <td class="small">{{ t.ticket_code[:12] }}...</td>
+                        <td>{{ t.event.title }}</td>
+                        <td>{{ t.holder_name }}<br><span class="text-muted small">{{ t.holder_email }}</span></td>
+                        <td>
+                            {% if t.status == "valid" %}<span class="badge bg-success">Còn hiệu lực</span>
+                            {% elif t.status == "used" %}<span class="badge bg-secondary">Đã check-in</span>
+                            {% else %}<span class="badge bg-danger">Đã huỷ</span>{% endif %}
+                        </td>
+                        <td class="small text-muted">{{ t.created_at.strftime("%d/%m/%Y %H:%M") if t.created_at else "-" }}</td>
+                        <td>
+                            <a href="{{ url_for('admin.ticket_qr', ticket_id=t.id) }}" class="btn btn-sm btn-outline-info">QR</a>
+                            {% if t.status == "valid" %}
+                            <form method="post" action="{{ url_for('admin.ticket_cancel', ticket_id=t.id) }}" class="d-inline"
+                                  onsubmit="return confirm('Huỷ vé này?');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">Huỷ vé</button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="6" class="text-center text-muted py-4">Chưa có vé nào.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

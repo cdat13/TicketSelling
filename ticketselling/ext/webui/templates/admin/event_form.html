@@ -1,0 +1,81 @@
+{% extends "layout/admin_base.html" %}
+
+{% block title %}{{ "Sửa" if event else "Thêm" }} Sự kiện - Ticket Admin{% endblock %}
+{% block page_heading %}Thông tin Sự kiện{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 font-weight-bold">Điền thông tin chi tiết</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="eventName" class="form-label">Tên sự kiện <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="eventName" name="name" required
+                               placeholder="Nhập tên sự kiện..." value="{{ event.title if event else '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="eventLocation" class="form-label">Địa điểm <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="eventLocation" name="location" required
+                               placeholder="Nhập địa điểm tổ chức..." value="{{ event.location if event else '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="organizer_id" class="form-label">Nhà tổ chức</label>
+                        <select name="organizer_id" id="organizer_id" class="form-select">
+                            <option value="">-- Thuộc về Admin (Tự tổ chức) --</option>
+                            {% for org in organizers %}
+                            <option value="{{ org.id }}" {% if event and event.organizer_id == org.id %}selected{% endif %}>
+                                {{ org.username }} ({{ org.email }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="eventDescription" class="form-label">Mô tả sự kiện</label>
+                        <textarea class="form-control" id="eventDescription" name="description" rows="4"
+                                  placeholder="Nhập nội dung mô tả...">{{ event.description if event else '' }}</textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="eventDate" class="form-label">Ngày giờ tổ chức <span class="text-danger">*</span></label>
+                            <input type="datetime-local" class="form-control" id="eventDate" name="date" required
+                                   value="{{ event.start_time.strftime('%Y-%m-%dT%H:%M') if event and event.start_time else '' }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="ticketTotal" class="form-label">Tổng số lượng vé <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="ticketTotal" name="ticket_capacity" min="1" required
+                                   value="{{ event.ticket_capacity if event else '' }}">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="ticketPrice" class="form-label">Giá vé (đ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="ticketPrice" name="ticket_price" min="0" required
+                                   value="{{ event.ticket_price if event else '' }}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Trạng thái</label>
+                        <select name="status" class="form-select">
+                            <option value="ACTIVE" {% if event and event.status == 'ACTIVE' %}selected{% endif %}>Mở bán</option>
+                            <option value="CLOSED" {% if event and event.status == 'CLOSED' %}selected{% endif %}>Đã đóng</option>
+                            <option value="DRAFT" {% if event and event.status == 'DRAFT' %}selected{% endif %}>Bản nháp</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('admin.event_list') }}" class="btn btn-outline-secondary">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary">Lưu sự kiện</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
