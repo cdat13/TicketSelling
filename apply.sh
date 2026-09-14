@@ -9,6 +9,7 @@ do
     esac
 done
 
+
 echo "Author: $author";
 echo "Project Name: $name";
 echo "Project URL name: $urlname";

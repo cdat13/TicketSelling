@@ -136,3 +136,6 @@ development.db
 CppProperties.json
 
 .idea/
+
+#khong day len github
+.env
