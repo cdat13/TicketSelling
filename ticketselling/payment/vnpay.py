@@ -39,7 +39,7 @@ def create_payment():
         "vnp_Amount": int(amount * 100),
         "vnp_CurrCode": "VND",
         "vnp_TxnRef": txn_ref,
-        "vnp_OrderInfo": "Thanh toan demo VNPAY",
+        "vnp_OrderInfo": "Thanh_toan_demo_VNPAY",
         "vnp_OrderType": "other",
         "vnp_Locale": "vn",
         "vnp_ReturnUrl": url_for(

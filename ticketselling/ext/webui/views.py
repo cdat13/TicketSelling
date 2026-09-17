@@ -509,6 +509,7 @@ def create_payment():
     tmn_code = os.getenv("VNPAY_TMN_CODE")
     hash_secret = os.getenv("VNPAY_HASH_SECRET")
 
+
     if not tmn_code:
         return "Chưa cấu hình VNPAY_TMN_CODE.", 500
 
@@ -564,6 +565,7 @@ def create_payment():
     )
 
     return redirect(payment_url)
+
 
 def payment_result():
 
