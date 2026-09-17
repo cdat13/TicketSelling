@@ -1,138 +1,58 @@
-﻿// STEP ELEMENTS
-console.log("checkout.js loaded");
+﻿document.addEventListener("DOMContentLoaded", function () {
 
-const step1 = document.getElementById("step1");
-const step2 = document.getElementById("step2");
-const step3 = document.getElementById("step3");
+    const btnNext1 = document.getElementById("btnNext1");
+    const btnBack1 = document.getElementById("btnBack1");
 
-// Delivery option
-const deliveryOptions = document.querySelectorAll(".delivery-option");
+    const step1 = document.getElementById("step1");
+    const step2 = document.getElementById("step2");
 
-deliveryOptions.forEach(option => {
+    const indicator1 = document.getElementById("indicator1");
+    const indicator2 = document.getElementById("indicator2");
 
-    option.addEventListener("click", function () {
+    if (btnNext1) {
+        btnNext1.addEventListener("click", function () {
 
-        deliveryOptions.forEach(item => {
-            item.classList.remove("active");
-            item.querySelector("input[type='radio']").checked = false;
+            const name = document.getElementById("customer_name_input").value.trim();
+            const email = document.getElementById("email_input").value.trim();
+            const phone = document.getElementById("phone_input").value.trim();
+            const identity = document.getElementById("identity_input").value.trim();
+
+            if (!name || !email || !phone) {
+                alert("Vui lòng nhập đầy đủ Họ và tên, Email và Số điện thoại.");
+                return;
+            }
+
+            document.getElementById("customer_name").value = name;
+            document.getElementById("email").value = email;
+            document.getElementById("phone").value = phone;
+            document.getElementById("identity").value = identity;
+
+            const delivery = document.querySelector(
+                'input[name="delivery"]:checked'
+            );
+
+            if (delivery) {
+                document.getElementById("delivery").value = delivery.value;
+            }
+
+            step1.style.display = "none";
+
+            step2.style.display = "block";
+
+            indicator1.classList.remove("active");
+            indicator2.classList.add("active");
         });
+    }
 
-        this.classList.add("active");
-        this.querySelector("input[type='radio']").checked = true;
+    if (btnBack1) {
+        btnBack1.addEventListener("click", function () {
 
-    });
+            step2.style.display = "none";
+            step1.style.display = "block";
 
-});
-
-// PAYMENT METHOD
-
-const paymentOptions = document.querySelectorAll(".payment-item");
-
-if (paymentOptions.length > 0) {
-
-    paymentOptions[0].classList.add("active");
-    paymentOptions[0].querySelector("input").checked = true;
-
-    paymentOptions.forEach(option => {
-
-        option.addEventListener("click", function () {
-
-            paymentOptions.forEach(item => {
-
-                item.classList.remove("active");
-                item.querySelector("input").checked = false;
-
-            });
-
-            this.classList.add("active");
-            this.querySelector("input").checked = true;
-
+            indicator2.classList.remove("active");
+            indicator1.classList.add("active");
         });
-
-    });
-
-}
-
-// BUTTONS
-
-const btnNext1 = document.getElementById("btnNext1");
-const btnNext2 = document.getElementById("btnNext2");
-
-const btnBack1 = document.getElementById("btnBack1");
-const btnBack2 = document.getElementById("btnBack2");
-
-const indicator1 = document.getElementById("indicator1");
-const indicator2 = document.getElementById("indicator2");
-const indicator3 = document.getElementById("indicator3");
-
-function showStep(step) {
-
-    step1.style.display = "none";
-    step2.style.display = "none";
-    step3.style.display = "none";
-
-    indicator1.classList.remove("active");
-    indicator2.classList.remove("active");
-    indicator3.classList.remove("active");
-
-    if (step === 1) {
-
-        step1.style.display = "block";
-        indicator1.classList.add("active");
-
     }
 
-    if (step === 2) {
-
-        step2.style.display = "block";
-
-        indicator1.classList.add("active");
-        indicator2.classList.add("active");
-
-    }
-
-    if (step === 3) {
-
-        step3.style.display = "block";
-
-        indicator1.classList.add("active");
-        indicator2.classList.add("active");
-        indicator3.classList.add("active");
-
-    }
-
-}
-
-btnNext1.addEventListener("click", function (e) {
-
-    e.preventDefault();
-
-    showStep(2);
-
 });
-
-btnNext2.addEventListener("click", function (e) {
-
-    e.preventDefault();
-
-    showStep(3);
-
-});
-
-btnBack1.addEventListener("click", function (e) {
-
-    e.preventDefault();
-
-    showStep(1);
-
-});
-
-btnBack2.addEventListener("click", function (e) {
-
-    e.preventDefault();
-
-    showStep(2);
-
-});
-
-showStep(1);
