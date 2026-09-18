@@ -11,3 +11,4 @@ gunicorn==23.0.0
 Flask-DebugToolbar
 python-dotenv
 qrcode[pil]==8.2
+PyMySQL
