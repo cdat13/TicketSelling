@@ -50,6 +50,7 @@ Trang chủ
     </div>
 
 </section>
+
 <!-- Search -->
 <form method="GET"
       action="{{ url_for('webui.event_list') }}"
@@ -128,7 +129,8 @@ Trang chủ
     </div>
 
 </form>
-    <!-- Categories -->
+
+'<!-- Categories -->
 <section class="container mt-5">
 
     <h2 class="mb-4">
@@ -176,9 +178,10 @@ Trang chủ
 
         <h2>Sự kiện nổi bật</h2>
 
-        <a href="{{ url_for('webui.event_list') }}"
-           class="btn btn-primary">
-            Xem tất cả
+        <a href="{{ url_for('webui.event_list') }}">
+            <button class="btn btn-primary w-100">
+                Xem tất cả
+            </button>
         </a>
 
     </div>
