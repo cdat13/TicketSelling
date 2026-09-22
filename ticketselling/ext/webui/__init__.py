@@ -8,7 +8,6 @@ from .views import (
     create_payment, payment_result
 )
 
-from ticketselling.payment import bp as payment_bp
 
 bp = Blueprint(
     "webui",
@@ -54,5 +53,4 @@ admin_bp.add_url_rule("/api/check-ticket", view_func=api_check_ticket, endpoint=
 
 def init_app(app):
     app.register_blueprint(bp)
-    app.register_blueprint(payment_bp)
     app.register_blueprint(admin_bp)
