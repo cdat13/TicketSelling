@@ -50,6 +50,7 @@ Trang chủ
     </div>
 
 </section>
+
 <!-- Search -->
 <form method="GET"
       action="{{ url_for('webui.event_list') }}"
@@ -128,7 +129,8 @@ Trang chủ
     </div>
 
 </form>
-    '<!-- Categories -->
+
+'<!-- Categories -->
 <section class="container mt-5">
 
     <h2 class="mb-4">
@@ -195,7 +197,7 @@ Trang chủ
                 <img src="{{ url_for('webui.static', filename='img/demo.png') }}"
                      class="card-img-top">
 
-                <div class="card-body">
+                <div class="card-body d-flex flex-column">
 
                     <span class="badge bg-primary">
                         {% if event.category %}
@@ -239,7 +241,7 @@ Trang chủ
                     {% endif %}
 
                     <a href="{{ url_for('webui.event_detail', event_id=event.id) }}"
-                       class="btn btn-primary w-100">
+                       class="btn btn-primary w-100 mt-auto">
                         Xem chi tiết
                     </a>
 
