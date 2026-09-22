@@ -1,11 +1,8 @@
-﻿import os
-import hashlib
+﻿import hashlib
 import hmac
 import urllib.parse
 
 from datetime import datetime
-from zoneinfo import ZoneInfo
-
 from flask import redirect, request, url_for
 
 
@@ -27,11 +24,13 @@ def create_payment():
     tmn_code = tmn_code.strip()
     hash_secret = hash_secret.strip()
 
-    now = datetime.now()
+    # Thời gian Việt Nam
+    from zoneinfo import ZoneInfo
+    now = datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
 
     txn_ref = "TEST" + now.strftime("%Y%m%d%H%M%S")
 
-    # Lấy IP thật phía client nếu Render đang reverse proxy
+    # Lấy IP client
     client_ip = request.headers.get("X-Forwarded-For")
 
     if client_ip:
@@ -43,7 +42,7 @@ def create_payment():
         "vnp_Version": "2.1.0",
         "vnp_Command": "pay",
         "vnp_TmnCode": tmn_code,
-        "vnp_Amount": str(amount * 100),
+        "vnp_Amount": str(int(amount * 100)),
         "vnp_CurrCode": "VND",
         "vnp_TxnRef": txn_ref,
         "vnp_OrderInfo": "Thanh toan demo VNPAY",
@@ -57,43 +56,52 @@ def create_payment():
         "vnp_CreateDate": now.strftime("%Y%m%d%H%M%S"),
     }
 
-    # Sort alphabet
+    # Sort theo tên parameter
     params = dict(sorted(params.items()))
 
-    # =====================================
-    # HASH DATA - KHÔNG URL ENCODE
-    # =====================================
+    # =========================
+    # TẠO CHUỖI HASH
+    # =========================
+
     hash_data = "&".join(
         f"{key}={value}"
         for key, value in params.items()
         if value is not None and value != ""
     )
 
+    # HMAC SHA512
     secure_hash = hmac.new(
         hash_secret.encode("utf-8"),
         hash_data.encode("utf-8"),
         hashlib.sha512
     ).hexdigest()
 
-    # =====================================
-    # QUERY STRING - URL ENCODE
-    # =====================================
-    query_string = urllib.parse.urlencode(params)
+    # =========================
+    # TẠO QUERY STRING
+    # =========================
+
+    query_string = urllib.parse.urlencode(
+        params,
+        quote_via=urllib.parse.quote
+    )
 
     payment_url = (
-        "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?"
+        VNPAY_URL
+        + "?"
         + query_string
         + "&vnp_SecureHash="
         + secure_hash
     )
 
-    print("========== VNPAY DEBUG ==========", flush=True)
-    print("TMN CODE:", tmn_code, flush=True)
-    print("TXN REF:", txn_ref, flush=True)
-    print("IP:", client_ip, flush=True)
-    print("RETURN URL:", params["vnp_ReturnUrl"], flush=True)
-    print("HASH DATA:", hash_data, flush=True)
-    print("SECURE HASH:", secure_hash, flush=True)
-    print("=================================", flush=True)
+    # DEBUG
+    print("========== VNPAY DEBUG ==========")
+    print("TMN CODE:", tmn_code)
+    print("TXN REF:", txn_ref)
+    print("IP:", client_ip)
+    print("RETURN URL:", params["vnp_ReturnUrl"])
+    print("HASH DATA:", hash_data)
+    print("SECURE HASH:", secure_hash)
+    print("PAYMENT URL:", payment_url)
+    print("=================================")
 
     return redirect(payment_url)
