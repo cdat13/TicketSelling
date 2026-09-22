@@ -12,8 +12,8 @@ VNPAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 def create_payment():
     amount = 10000
 
-    tmn_code = "C267DLWS"
-    hash_secret = "RCZB1B6FHJZAWP83LT84G4W81NPOAT3I"
+    tmn_code = "LHD1JD82"
+    hash_secret = "TEVZXVUASYYJQMWBDZRKVKASTELDKIAN"
 
     if not tmn_code:
         return "Chưa cấu hình VNPAY_TMN_CODE.", 500
