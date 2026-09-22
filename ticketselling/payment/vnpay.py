@@ -14,8 +14,13 @@ def create_payment():
 
     amount = 10000
 
-    tmn_code = C267DLWSs
-    hash_secret = RCZB1B6FHJZAWP83LT84G4W81NPOAT3I
+    #tmn_code = C267DLWSs
+    #hash_secret = RCZB1B6FHJZAWP83LT84G4W81NPOAT3I
+
+      # Lấy thông tin từ Environment Variables trên Render
+    tmn_code = os.getenv("VNPAY_TMN_CODE")
+    hash_secret = os.getenv("VNPAY_HASH_SECRET")
+
 
     vnpay_url = os.getenv(
         "VNPAY_URL",
