@@ -5,7 +5,7 @@ from ticketselling.models import EventCategory
 from ticketselling.ext.auth import create_user
 
 from datetime import datetime, timedelta
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, session
 from ticketselling.ext.database import db
 from ticketselling.models import Event, Ticket, User
 from ticketselling.ext.qr_utils import generate_qr_base64_png
@@ -14,11 +14,14 @@ import os
 import urllib.parse
 import hmac
 import hashlib
+from datetime import datetime
 
 
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
 
 def index():
     keyword = request.args.get("keyword", "").strip()
@@ -292,11 +295,137 @@ def event_detail(event_id):
 
 
 @login_required
+@login_required
 def checkout():
 
-    return render_template("checkout/checkout.html")
+    if request.method == "POST":
 
+        event_id = request.form.get("event_id", type=int)
 
+        if not event_id:
+            flash("Không xác định được sự kiện.", "danger")
+            return redirect(url_for("webui.index"))
+
+        event = Event.query.get_or_404(event_id)
+
+        selected_items = []
+        total_amount = 0
+
+        # Lấy số lượng vé từ form
+        for ticket_type in event.ticket_types:
+
+            field_name = f"ticket_{ticket_type.id}"
+            quantity = request.form.get(field_name, 0, type=int)
+
+            if quantity < 0:
+                quantity = 0
+
+            if quantity == 0:
+                continue
+
+            # Kiểm tra tồn kho
+            if quantity > ticket_type.current_stock:
+                flash(
+                    f"Loại vé '{ticket_type.name}' chỉ còn "
+                    f"{ticket_type.current_stock} vé.",
+                    "danger"
+                )
+                return redirect(
+                    url_for(
+                        "webui.event_detail",
+                        event_id=event.id
+                    )
+                )
+
+            item_total = quantity * ticket_type.price
+            total_amount += item_total
+
+            selected_items.append({
+                "ticket_type_id": ticket_type.id,
+                "name": ticket_type.name,
+                "price": ticket_type.price,
+                "quantity": quantity,
+                "subtotal": item_total
+            })
+
+        # Không chọn vé nào
+        if not selected_items:
+            flash("Vui lòng chọn ít nhất một vé.", "warning")
+            return redirect(
+                url_for(
+                    "webui.event_detail",
+                    event_id=event.id
+                )
+            )
+
+        # Lưu thông tin checkout vào session
+        session["checkout_data"] = {
+            "event_id": event.id,
+            "items": [
+                {
+                    "ticket_type_id": item["ticket_type_id"],
+                    "quantity": item["quantity"]
+                }
+                for item in selected_items
+            ],
+            "total_amount": total_amount
+        }
+
+        return render_template(
+            "checkout/checkout.html",
+            event=event,
+            selected_items=selected_items,
+            total_amount=total_amount
+        )
+
+    # GET /checkout
+    checkout_data = session.get("checkout_data")
+
+    if not checkout_data:
+        flash("Chưa có thông tin vé.", "warning")
+        return redirect(url_for("webui.index"))
+
+    event = Event.query.get_or_404(
+        checkout_data["event_id"]
+    )
+
+    selected_items = []
+
+    for item in checkout_data["items"]:
+
+        ticket_type = next(
+            (
+                ticket
+                for ticket in event.ticket_types
+                if ticket.id == item["ticket_type_id"]
+            ),
+            None
+        )
+
+        if not ticket_type:
+            continue
+
+        quantity = item["quantity"]
+
+        selected_items.append({
+            "ticket_type_id": ticket_type.id,
+            "name": ticket_type.name,
+            "price": ticket_type.price,
+            "quantity": quantity,
+            "subtotal": quantity * ticket_type.price
+        })
+
+    total_amount = sum(
+        item["subtotal"]
+        for item in selected_items
+    )
+
+    return render_template(
+        "checkout/checkout.html",
+        event=event,
+        selected_items=selected_items,
+        total_amount=total_amount
+    )
 
 def approve_organizer(user_id):
     user = User.query.get_or_404(user_id)
@@ -502,73 +631,7 @@ def api_check_ticket():
         "message": "Check-in thành công!"
     })
 
-def create_payment():
-
-    amount = 10000
-
-    tmn_code = os.getenv("VNPAY_TMN_CODE")
-    hash_secret = os.getenv("VNPAY_HASH_SECRET")
-
-
-    if not tmn_code:
-        return "Chưa cấu hình VNPAY_TMN_CODE.", 500
-
-    if not hash_secret:
-        return "Chưa cấu hình VNPAY_HASH_SECRET.", 500
-
-    now = datetime.now()
-
-    txn_ref = "TEST" + now.strftime("%Y%m%d%H%M%S")
-
-    params = {
-        "vnp_Version": "2.1.0",
-        "vnp_Command": "pay",
-        "vnp_TmnCode": tmn_code,
-        "vnp_Amount": int(amount * 100),
-        "vnp_CurrCode": "VND",
-        "vnp_TxnRef": txn_ref,
-        "vnp_OrderInfo": "Thanh toan demo VNPAY",
-        "vnp_OrderType": "other",
-        "vnp_Locale": "vn",
-        "vnp_ReturnUrl": url_for(
-            "webui.payment_result",
-            _external=True
-        ),
-        "vnp_IpAddr": request.remote_addr or "127.0.0.1",
-        "vnp_CreateDate": now.strftime("%Y%m%d%H%M%S"),
-    }
-
-    params = dict(sorted(params.items()))
-
-    hash_data = urllib.parse.urlencode(
-        params,
-        quote_via=urllib.parse.quote
-    )
-
-    secure_hash = hmac.new(
-        hash_secret.encode("utf-8"),
-        hash_data.encode("utf-8"),
-        hashlib.sha512
-    ).hexdigest()
-
-    query_string = urllib.parse.urlencode(
-        params,
-        quote_via=urllib.parse.quote
-    )
-
-    payment_url = (
-        "https://sandbox.vnpayment.vn/"
-        "paymentv2/vpcpay.html?"
-        + query_string
-        + "&vnp_SecureHash="
-        + secure_hash
-    )
-
-    return redirect(payment_url)
-
-
 def payment_result():
-
     return """
         <h2>Thanh toán VNPAY</h2>
         <p>Đã quay trở lại website.</p>

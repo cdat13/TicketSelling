@@ -4,9 +4,9 @@ from .views import (
     index, event_list, secret, only_admin, register, event_detail, checkout,
     user_list, approve_organizer, dashboard, event_form,
     event_delete, ticket_qr, ticket_list, ticket_cancel, revenue,
-    scan_qr, checkin_process, api_check_ticket, admin_event_list,
-    create_payment, payment_result
+    scan_qr, checkin_process, api_check_ticket, admin_event_list, payment_result
 )
+from ticketselling.payment import bp as payment_bp
 
 
 bp = Blueprint(
@@ -32,8 +32,12 @@ bp.add_url_rule("/events", view_func=event_list, endpoint="event_list")
 bp.add_url_rule("/checkout", view_func=checkout, methods=["GET", "POST"])
 bp.add_url_rule("/secret", view_func=secret, endpoint="secret")
 bp.add_url_rule("/only_admin", view_func=only_admin, endpoint="onlyadmin")
-bp.add_url_rule("/payment/create", view_func=create_payment, methods=["POST"])
-bp.add_url_rule("/payment/result", view_func=payment_result)
+bp.add_url_rule(
+    "/payment/result",
+    view_func=payment_result,
+    endpoint="payment_result",
+    methods=["GET"]
+)
 
 # --- URL RULES CHO ADMIN ---
 admin_bp.add_url_rule("/", view_func=dashboard, endpoint="dashboard_main")
@@ -54,3 +58,4 @@ admin_bp.add_url_rule("/api/check-ticket", view_func=api_check_ticket, endpoint=
 def init_app(app):
     app.register_blueprint(bp)
     app.register_blueprint(admin_bp)
+    app.register_blueprint(payment_bp)

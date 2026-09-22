@@ -1,4 +1,5 @@
-﻿{% extends "layout/base.html" %}
+﻿```html
+{% extends "layout/base.html" %}
 
 {% block title %}
 Thanh toán
@@ -9,6 +10,9 @@ Thanh toán
 
 <div class="container py-5">
 
+    <!-- =========================
+         CHECKOUT STEPS
+    ========================== -->
     <div class="checkout-step mb-5">
 
         <div class="step active" id="indicator1">
@@ -59,7 +63,15 @@ Thanh toán
 
 
     <div class="row g-4">
+
+        <!-- ==================================================
+             LEFT SIDE
+        =================================================== -->
         <div class="col-lg-8">
+
+            <!-- =========================
+                 STEP 1
+            ========================== -->
             <div id="step1">
 
                 <div class="card checkout-card">
@@ -70,7 +82,9 @@ Thanh toán
                             Thông tin nhận vé
                         </h3>
 
+
                         <div class="row">
+
                             <div class="col-md-6 mb-3">
 
                                 <label class="form-label">
@@ -83,6 +97,8 @@ Thanh toán
                                        required>
 
                             </div>
+
+
                             <div class="col-md-6 mb-3">
 
                                 <label class="form-label">
@@ -95,6 +111,8 @@ Thanh toán
                                        required>
 
                             </div>
+
+
                             <div class="col-md-6 mb-3">
 
                                 <label class="form-label">
@@ -107,6 +125,8 @@ Thanh toán
                                        required>
 
                             </div>
+
+
                             <div class="col-md-6 mb-3">
 
                                 <label class="form-label">
@@ -120,31 +140,46 @@ Thanh toán
                             </div>
 
                         </div>
+
+
                         <hr>
+
+
                         <h5 class="mb-3">
                             Hình thức nhận vé
                         </h5>
+
+
                         <div class="delivery-option">
 
                             <input type="radio"
                                    name="delivery"
                                    value="email"
                                    checked>
+
                             <div>
+
                                 <h6>
                                     Vé điện tử
                                 </h6>
+
                                 <small>
                                     Vé sẽ gửi qua Email ngay sau khi thanh toán.
                                 </small>
+
                             </div>
+
                         </div>
+
+
                         <div class="delivery-option">
 
                             <input type="radio"
                                    name="delivery"
                                    value="event">
+
                             <div>
+
                                 <h6>
                                     Nhận tại sự kiện
                                 </h6>
@@ -156,14 +191,13 @@ Thanh toán
                             </div>
 
                         </div>
+
+
                         <button id="btnNext1"
                                 type="button"
                                 class="btn btn-primary btn-lg mt-3">
-
                             Tiếp tục
-
                             <i class="fa-solid fa-arrow-right ms-2"></i>
-
                         </button>
 
                     </div>
@@ -171,16 +205,21 @@ Thanh toán
                 </div>
 
             </div>
+
+
+            <!-- =========================
+                 STEP 2
+            ========================== -->
             <div id="step2" style="display:none;">
 
                 <div class="card checkout-card">
 
                     <div class="card-body p-4">
 
-
                         <h3 class="mb-4">
                             Chọn phương thức thanh toán
                         </h3>
+
 
                         <div class="payment-item">
 
@@ -192,12 +231,8 @@ Thanh toán
                             <div>
 
                                 <h5>
-
-                                    <i class="fa-solid fa-qrcode me-2">
-                                    </i>
-
+                                    <i class="fa-solid fa-qrcode me-2"></i>
                                     VNPAY QR
-
                                 </h5>
 
                                 <small>
@@ -210,60 +245,70 @@ Thanh toán
 
 
                         <hr class="my-4">
+
+
                         <form id="paymentForm"
-                              action="{{ url_for('webui.create_payment') }}"
+                              action="{{ url_for('payment.payment_create') }}"
                               method="POST">
+
+                            <!--
+                                Các thông tin này được checkout.js
+                                lấy từ Step 1 rồi đưa vào form
+                            -->
 
                             <input type="hidden"
                                    name="customer_name"
                                    id="customer_name">
 
-
                             <input type="hidden"
                                    name="email"
                                    id="email">
-
 
                             <input type="hidden"
                                    name="phone"
                                    id="phone">
 
-
                             <input type="hidden"
                                    name="identity"
                                    id="identity">
 
-
                             <input type="hidden"
                                    name="delivery"
                                    id="delivery">
-
 
                             <input type="hidden"
                                    name="payment_method"
                                    value="VNPAY">
 
 
-                            <div class="d-flex justify-content-between mt-5">
+                            <div class="alert alert-light border">
 
+                                <div class="d-flex justify-content-between">
+                                    <span>
+                                        Số tiền thanh toán
+                                    </span>
+
+                                    <strong class="text-primary">
+                                        {{ "{:,.0f}".format(total_amount).replace(",", ".") }}đ
+                                    </strong>
+                                </div>
+
+                            </div>
+
+
+                            <div class="d-flex justify-content-between mt-5">
 
                                 <button id="btnBack1"
                                         type="button"
                                         class="btn btn-light">
-
                                     Quay lại
-
                                 </button>
 
 
                                 <button type="submit"
                                         class="btn btn-primary btn-lg">
-
                                     Thanh toán
-
-                                    <i class="fa-solid fa-arrow-right ms-2">
-                                    </i>
-
+                                    <i class="fa-solid fa-arrow-right ms-2"></i>
                                 </button>
 
                             </div>
@@ -276,6 +321,10 @@ Thanh toán
 
             </div>
 
+
+            <!-- =========================
+                 STEP 3
+            ========================== -->
             <div id="step3" style="display:none;">
 
                 <div class="card checkout-card">
@@ -283,8 +332,7 @@ Thanh toán
                     <div class="card-body p-5 text-center">
 
                         <i class="fa-solid fa-circle-check text-success"
-                           style="font-size:60px;">
-                        </i>
+                           style="font-size:60px;"></i>
 
                         <h3 class="mt-4">
                             Thanh toán thành công
@@ -298,20 +346,23 @@ Thanh toán
 
         </div>
 
+
+        <!-- ==================================================
+             RIGHT SIDE - ORDER SUMMARY
+        =================================================== -->
         <div class="col-lg-4">
 
             <div class="card ticket-summary">
 
                 <img src="{{ url_for(
-                    'webui.static',
-                    filename='img/demo.png'
-                ) }}"
+                        'webui.static',
+                        filename='img/demo.png'
+                    ) }}"
                      class="card-img-top"
                      alt="VNPAY Demo">
 
 
                 <div class="card-body">
-
 
                     <span class="badge bg-danger">
                         DEMO
@@ -319,7 +370,7 @@ Thanh toán
 
 
                     <h4 class="mt-3">
-                        Thanh toán VNPAY Demo
+                        {{ event.name if event else "Thanh toán VNPAY Demo" }}
                     </h4>
 
 
@@ -329,6 +380,55 @@ Thanh toán
 
 
                     <hr>
+
+
+                    <!-- =========================
+                         SELECTED TICKETS
+                    ========================== -->
+                    <h6 class="mb-3">
+                        Vé đã chọn
+                    </h6>
+
+
+                    {% if selected_items %}
+
+                    {% for item in selected_items %}
+
+                    <div class="d-flex justify-content-between mb-2">
+
+                        <div>
+
+                            <div>
+                                {{ item.name }}
+                            </div>
+
+                            <small class="text-muted">
+                                {{ item.quantity }} ×
+                                {{ "{:,.0f}".format(item.price).replace(",", ".") }}đ
+                            </small>
+
+                        </div>
+
+
+                        <strong>
+                            {{ "{:,.0f}".format(item.subtotal).replace(",", ".") }}đ
+                        </strong>
+
+                    </div>
+
+                    {% endfor %}
+
+                    {% else %}
+
+                    <p class="text-muted">
+                        Chưa có vé được chọn.
+                    </p>
+
+                    {% endif %}
+
+
+                    <hr>
+
 
                     <div class="d-flex justify-content-between">
 
@@ -350,18 +450,23 @@ Thanh toán
                         </span>
 
                         <strong>
-                            10.000đ
+                            {{ "{:,.0f}".format(total_amount).replace(",", ".") }}đ
                         </strong>
 
                     </div>
+
+
                     <hr>
+
+
                     <div class="d-flex justify-content-between">
 
                         <h5>
                             Tổng cộng
                         </h5>
+
                         <h4 class="text-primary">
-                            10.000đ
+                            {{ "{:,.0f}".format(total_amount).replace(",", ".") }}đ
                         </h4>
 
                     </div>
@@ -382,9 +487,9 @@ Thanh toán
 {% block scripts %}
 
 <script src="{{ url_for(
-        'webui.static',
-        filename='js/checkout.js'
-    ) }}">
-</script>
+    'webui.static',
+    filename='js/checkout.js'
+) }}"></script>
 
 {% endblock %}
+```
