@@ -2,18 +2,27 @@
 import hashlib
 import hmac
 import urllib.parse
-
+import json
 from datetime import datetime
 from datetime import datetime, timedelta
-from flask import redirect, request, url_for
-
+from flask import redirect, request, url_for, session, flash
+from ticketselling.ext.database import db
+from ticketselling.models import Order
 
 VNPAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 
 
 def create_payment():
 
-    amount = 10000
+    checkout_data = session.get("checkout_data")
+    if not checkout_data:
+        flash("Không có thông tin đơn hàng, vui lòng chọn vé lại.", "warning")
+        return redirect(url_for("webui.index"))
+
+    amount = int(round(float(checkout_data["total_amount"])))
+    if amount <= 0:
+        flash("Số tiền thanh toán không hợp lệ.", "danger")
+        return redirect(url_for("webui.index"))
 
     tmn_code = os.getenv("VNPAY_TMN_CODE")
     hash_secret = os.getenv("VNPAY_HASH_SECRET")
@@ -28,8 +37,25 @@ def create_payment():
     hash_secret = hash_secret.strip()
 
     now = datetime.utcnow() + timedelta(hours=7)
-
     txn_ref = "TEST" + now.strftime("%Y%m%d%H%M%S")
+
+    order = Order(
+        order_code=txn_ref,
+        customer_name=request.form.get("customer_name", "").strip(),
+        email=request.form.get("email", "").strip(),
+        phone=request.form.get("phone", "").strip(),
+        total_amount=amount,
+        ticket_quantity=sum(i["quantity"] for i in checkout_data["items"]),
+        note=json.dumps({
+            "event_id": checkout_data["event_id"],
+            "items": checkout_data["items"],
+        }),
+        payment_method="VNPAY",
+        payment_status="Pending",
+        vnp_txn_ref=txn_ref,
+    )
+    db.session.add(order)
+    db.session.commit()
 
     params = {
         "vnp_Version": "2.1.0",

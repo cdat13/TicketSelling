@@ -74,6 +74,8 @@ class Ticket(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ticket_code = db.Column(db.String(140), unique=True, nullable=False)
     event_id = db.Column(db.Integer, db.ForeignKey("events.id"), nullable=False)
+    ticket_type_id = db.Column(db.Integer, db.ForeignKey("ticket_types.id"))
+    price = db.Column(db.Numeric(12, 2), default=0)
     holder_name = db.Column(db.String(100), nullable=False)
     holder_email = db.Column(db.String(120), nullable=False)
     status = db.Column(db.String(20), default="valid")  # valid / used / cancelled

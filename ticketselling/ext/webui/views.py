@@ -1,9 +1,8 @@
-from collections import defaultdict
+import json
 
 from flask_simplelogin import login_required
-from ticketselling.models import EventCategory
+from ticketselling.models import EventCategory, Order, TicketType
 from ticketselling.ext.auth import create_user
-
 from datetime import datetime, timedelta
 from flask import render_template, request, redirect, url_for, flash, session
 from ticketselling.ext.database import db
@@ -445,7 +444,7 @@ def dashboard():
         "admin/dashboard.html",
         total_events=total_events,
         tickets_sold=len(active_tickets),
-        revenue=sum(t.event.ticket_price for t in active_tickets),
+        revenue=sum(float(t.price or 0) for t in active_tickets),
     )
 
 def admin_event_list():
@@ -529,44 +528,79 @@ def ticket_cancel(ticket_id):
 
     if ticket.status == "used":
         flash("Vé đã sử dụng, không thể hủy.", "danger")
-        return redirect(url_for("webui.ticket_list"))
+        return redirect(url_for("admin.ticket_list"))
 
     time_since_bought = datetime.now() - ticket.created_at
     if time_since_bought > timedelta(hours=24):
         flash("Đã quá 24h, bạn không thể hủy vé này nữa.", "warning")
-        return redirect(url_for("webui.ticket_list"))
+        return redirect(url_for("admin.ticket_list"))
+
+    if ticket.status == "cancelled":
+        flash("Vé này đã được hủy trước đó.", "info")
+        return redirect(url_for("admin.ticket_list"))
 
     ticket.status = "cancelled"
+
+    if ticket.ticket_type_id:
+        ticket_type = TicketType.query.get(ticket.ticket_type_id)
+        if ticket_type:
+            ticket_type.current_stock += 1
+
     db.session.commit()
     flash("Hủy vé thành công.", "success")
-    return redirect(url_for("webui.ticket_list"))
+    return redirect(url_for("admin.ticket_list"))
 
 def revenue():
+    period = request.args.get("period", "day")
     active_tickets = Ticket.query.filter(Ticket.status != "cancelled").all()
-    organizer_stats = defaultdict(int)
+
     grand_total = 0
     organizer_stats = {}
+    time_stats = {}
 
     for ticket in active_tickets:
         evt = ticket.event
-        grand_total += evt.ticket_price
+        ticket_price = float(ticket.price or 0)
+        grand_total += ticket_price
+
         org_name = evt.organizer.username if evt.organizer else "Admin (Nội bộ)"
-
         if org_name not in organizer_stats:
-            organizer_stats[org_name] = {
-                "sold": 0,
-                "revenue": 0,
-                "events_list": set()
-            }
-
+            organizer_stats[org_name] = {"sold": 0, "revenue": 0, "events_list": set()}
         organizer_stats[org_name]["sold"] += 1
-        organizer_stats[org_name]["revenue"] += evt.ticket_price
+        organizer_stats[org_name]["revenue"] += ticket_price
         organizer_stats[org_name]["events_list"].add(evt.name)
 
-    return render_template("admin/revenue.html",
-                           organizer_stats=organizer_stats,
-                           grand_total=grand_total)
+        created = ticket.created_at or datetime.utcnow()
 
+        if period == "day":
+            sort_key = created.date()
+            label = created.strftime("%d/%m/%Y")
+        elif period == "month":
+            sort_key = (created.year, created.month)
+
+            label = created.strftime("%m/%Y")
+        else:
+            sort_key = created.year
+            label = created.strftime("%Y")
+
+        if sort_key not in time_stats:
+            time_stats[sort_key] = {
+                "period_label": label,
+                "tickets_sold": 0,
+                "revenue": 0,
+            }
+        time_stats[sort_key]["tickets_sold"] += 1
+        time_stats[sort_key]["revenue"] += ticket_price
+
+    time_rows = [time_stats[k] for k in sorted(time_stats.keys())]
+
+    return render_template(
+        "admin/revenue.html",
+        organizer_stats=organizer_stats,
+        grand_total=grand_total,
+        period=period,
+        time_rows=time_rows,
+    )
 def scan_qr():
     return render_template("checkin/scan_qr.html")
 
@@ -632,8 +666,73 @@ def api_check_ticket():
     })
 
 def payment_result():
-    return """
-        <h2>Thanh toán VNPAY</h2>
-        <p>Đã quay trở lại website.</p>
-        <a href="/">Về trang chủ</a>
-    """
+    vnp_params = request.args.to_dict()
+    secure_hash = vnp_params.pop("vnp_SecureHash", None)
+    vnp_params.pop("vnp_SecureHashType", None)
+
+    hash_secret = os.getenv("VNPAY_HASH_SECRET", "").strip()
+
+    sorted_params = sorted(vnp_params.items())
+    hash_data = "&".join(
+        urllib.parse.quote_plus(str(k)) + "=" + urllib.parse.quote_plus(str(v))
+        for k, v in sorted_params if v not in (None, "")
+    )
+    computed_hash = hmac.new(
+        hash_secret.encode("utf-8"), hash_data.encode("utf-8"), hashlib.sha512
+    ).hexdigest()
+
+    txn_ref = vnp_params.get("vnp_TxnRef")
+    response_code = vnp_params.get("vnp_ResponseCode")
+
+    order = Order.query.filter_by(vnp_txn_ref=txn_ref).first()
+    if not order:
+        flash("Không tìm thấy đơn hàng tương ứng.", "danger")
+        return redirect(url_for("webui.index"))
+
+    if not hmac.compare_digest(computed_hash, secure_hash or ""):
+        flash("Chữ ký giao dịch không hợp lệ.", "danger")
+        return redirect(url_for("webui.index"))
+
+        # Chống xử lý trùng nếu người dùng F5 lại trang kết quả
+    if order.payment_status == "Paid":
+        flash("Đơn hàng đã được xử lý trước đó.", "info")
+        return redirect(url_for("webui.index"))
+
+    if response_code == "00":
+        order.payment_status = "Paid"
+        order.vnp_transaction_no = vnp_params.get("vnp_TransactionNo")
+        order.vnp_bank_code = vnp_params.get("vnp_BankCode")
+        order.vnp_response_code = response_code
+        order.vnp_secure_hash = secure_hash
+        order.paid_at = datetime.utcnow()
+
+        data = json.loads(order.note or "{}")
+        event_id = data.get("event_id")
+
+        for item in data.get("items", []):
+            ticket_type = TicketType.query.get(item["ticket_type_id"])
+            for _ in range(item["quantity"]):
+                db.session.add(Ticket(
+                    ticket_code=Ticket.generate_code(),
+                    event_id=event_id,
+                    ticket_type_id=ticket_type.id if ticket_type else None,
+                    price=ticket_type.price if ticket_type else 0,
+                    holder_name=order.customer_name,
+                    holder_email=order.email,
+                    status="valid",
+                ))
+            if ticket_type:
+                ticket_type.current_stock = max(
+                    0, ticket_type.current_stock - item["quantity"]
+                )
+
+        db.session.commit()
+        session.pop("checkout_data", None)
+        flash("Thanh toán thành công! Vé đã được ghi nhận.", "success")
+    else:
+        order.payment_status = "Failed"
+        order.vnp_response_code = response_code
+        db.session.commit()
+        flash("Thanh toán không thành công hoặc đã bị huỷ.", "danger")
+
+    return redirect(url_for("webui.index"))

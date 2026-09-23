@@ -5,7 +5,7 @@ from werkzeug.security import generate_password_hash
 from ticketselling.ext.database import db
 from ticketselling.models import Event, EventCategory, TicketType, User
 
-from sqlalchemy import text
+
 
 
 
